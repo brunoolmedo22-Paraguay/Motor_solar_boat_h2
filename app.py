@@ -23,7 +23,7 @@ from simulation.multimodel import (
     MODEL_SIMPLE,
     available_export_columns,
     build_export_dataframe,
-    build_synthetic_profile_120min,
+    build_synthetic_profile,
     candidate_window_starts,
     compute_model_kpis,
     detect_input_columns,
@@ -68,7 +68,7 @@ APP_CSS = """
   }
 
   .stApp { background: #FFFFFF; color: var(--solar-text); }
-  .block-container { padding-top: 1.15rem; padding-bottom: 3rem; max-width: 1680px; }
+  .block-container { padding-top: 4.75rem; padding-bottom: 3.5rem; max-width: 1680px; }
   h1, h2, h3 { letter-spacing: -0.025em; color: var(--solar-text); }
 
   [data-testid="stSidebar"] {
@@ -114,7 +114,7 @@ APP_CSS = """
     background:#F7FAFC; border:1px solid #E1E7ED; border-left:3px solid var(--solar-blue);
     border-radius:8px; padding:.7rem .85rem; color:#3E4C59; font-size:.8rem; margin:.3rem 0 .8rem;
   }
-  .status-row { display:flex; gap:.45rem; flex-wrap:wrap; margin-top:.55rem; }
+  .status-row { display:flex; gap:.45rem; flex-wrap:wrap; margin-top:.55rem; margin-bottom:.55rem; }
   .chip { display:inline-flex; align-items:center; border-radius:999px; padding:.28rem .56rem; font-size:.67rem; font-weight:800; }
   .chip-ok { background:#E8F7F1; color:#087A55; border:1px solid #BCE9D8; }
   .chip-warn { background:#FFF4DF; color:#9A6200; border:1px solid #F3D494; }
@@ -145,7 +145,7 @@ APP_CSS = """
   .tag-orange { color:#A55C00; background:#FFF3E2; border:1px solid #F2D3A5; }
   .model-explainer-title { color:#17222D; font-weight:900; font-size:1.02rem; margin:.1rem 0 .4rem; }
   .model-explainer-text { color:#5F6F7E; font-size:.78rem; line-height:1.55; min-height:74px; }
-  .needs-line { color:#748391; font-size:.68rem; margin-top:.55rem; }
+  .needs-line { color:#748391; font-size:.68rem; margin-top:.55rem; margin-bottom:.55rem; }
   .needs-line b { color:#3A4C5C; }
 
   .flow-shell {
@@ -185,7 +185,8 @@ APP_CSS = """
   div[data-testid="stLaTeX"] { font-size:.87rem; }
 
   div[data-testid="stVerticalBlockBorderWrapper"] {
-    border-color: var(--solar-border) !important; border-radius:10px !important; box-shadow:none !important;
+    border-color: var(--solar-border) !important; border-radius:10px !important;
+    box-shadow:none !important; padding-bottom:.2rem;
   }
   div[data-testid="stMetric"] {
     background:#FFFFFF; border:1px solid #DDE3E9; border-radius:9px;
@@ -267,6 +268,7 @@ def init_state() -> None:
         "run_config": {},
         "extraction_report": None,
         "current_page": NAV_OVERVIEW,
+        "last_run_notice": None,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -301,6 +303,27 @@ def panel_title(text: str) -> None:
 
 def status_chip(text: str, kind: str = "info") -> str:
     return f'<span class="chip chip-{kind}">{text}</span>'
+
+
+def _window_minutes(profile: pd.DataFrame) -> int:
+    step = float(profile.attrs.get("timestep_minutes", 1.0))
+    return int(round(len(profile) * step))
+
+
+def _window_label(profile: pd.DataFrame) -> str:
+    minutes = _window_minutes(profile)
+    if minutes == 1440:
+        return "24 h"
+    if minutes == 120:
+        return "120 min"
+    if minutes % 60 == 0:
+        return f"{minutes // 60} h"
+    return f"{minutes} min"
+
+
+def _window_slug(profile: pd.DataFrame) -> str:
+    minutes = _window_minutes(profile)
+    return "24h" if minutes == 1440 else f"{minutes}min"
 
 
 def model_datasheet(module) -> None:
@@ -352,7 +375,13 @@ def sidebar() -> str:
         results = st.session_state["results_by_model"]
         module_name = module.stc.model if module is not None else "Ainda não selecionado"
         if profile is not None:
-            window = f"{profile.index.min():%H:%M}–{profile.index.max():%H:%M} · 120 min"
+            start = profile.index.min()
+            end = profile.index.max()
+            if start.date() == end.date():
+                interval = f"{start:%H:%M}–{end:%H:%M}"
+            else:
+                interval = f"{start:%d/%m %H:%M}–{end:%d/%m %H:%M}"
+            window = f"{interval} · {_window_label(profile)}"
         else:
             window = "Aguardando entrada"
         st.markdown(
@@ -372,7 +401,7 @@ def sidebar() -> str:
             st.markdown('<div class="status-row">' + "".join(chips) + "</div>", unsafe_allow_html=True)
 
         st.divider()
-        st.caption("Janela operacional fixa: 120 amostras · passo de 1 minuto.")
+        st.caption("CSV: 120 min · perfil sintético: 120 min ou 24 h · passo de 1 minuto.")
         return st.session_state["current_page"]
 
 
@@ -390,9 +419,9 @@ def render_overview_page() -> None:
         "Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.",
     )
 
-    intro, visual = st.columns([0.83, 1.37], gap="medium")
+    intro, visual = st.columns([1.22, 0.98], gap="medium")
     with intro:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             panel_title("Conceito · O que é um modelo solar?")
             st.markdown(
                 """
@@ -403,7 +432,7 @@ def render_overview_page() -> None:
                   <b>temperatura</b> — ao comportamento do módulo selecionado no datasheet.
                 </div>
                 <div class="overview-note">
-                  Nesta plataforma, todos os modelos recebem a mesma janela de <b>120 minutos</b>,
+                  Nesta plataforma, todos os modelos recebem a mesma <b>janela temporal selecionada</b>,
                   o mesmo arranjo e o mesmo módulo. Assim, qualquer diferença observada vem da
                   formulação matemática, e não de entradas diferentes.
                 </div>
@@ -420,7 +449,7 @@ def render_overview_page() -> None:
             )
 
     with visual:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             panel_title("Conversão fotovoltaica · Irradiância → eletricidade")
             st.image(
                 "assets/fluxo_fotovoltaico.jpg",
@@ -433,7 +462,7 @@ def render_overview_page() -> None:
     model_1, model_2, model_3 = st.columns(3, gap="medium")
 
     with model_1:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             st.markdown('<span class="explain-tag tag-blue">Modelo 1 · Continuidade</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">Irradiância</div>', unsafe_allow_html=True)
             st.markdown(
@@ -448,7 +477,7 @@ def render_overview_page() -> None:
             )
 
     with model_2:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             st.markdown('<span class="explain-tag tag-green">Modelo 2 · Térmico</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">NOCT + eficiência</div>', unsafe_allow_html=True)
             st.markdown(
@@ -464,7 +493,7 @@ def render_overview_page() -> None:
             )
 
     with model_3:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             st.markdown('<span class="explain-tag tag-orange">Modelo 3 · Físico</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">Single Diode Model</div>', unsafe_allow_html=True)
             st.markdown(
@@ -488,7 +517,7 @@ def render_overview_page() -> None:
             """
             <div class="flow-shell">
               <div class="flow-node">
-                <small>ENTRADA COMUM · 120 MINUTOS</small>
+                <small>ENTRADA COMUM · 120 MINUTOS OU 24 HORAS</small>
                 <b>timestamp · GHI · Tamb opcional · datasheet · arranjo 2S × 3P</b>
               </div>
               <div class="flow-arrow">↓</div>
@@ -613,6 +642,18 @@ def render_input_page() -> None:
         width="stretch",
         key="run_models_button",
     )
+    run_feedback = st.empty()
+    if run_requested:
+        st.session_state["last_run_notice"] = None
+    else:
+        previous_notice = st.session_state.get("last_run_notice")
+        if previous_notice:
+            getattr(run_feedback, previous_notice["kind"])(previous_notice["message"])
+
+    def show_run_notice(kind: str, message: str) -> None:
+        st.session_state["last_run_notice"] = {"kind": kind, "message": message}
+        getattr(run_feedback, kind)(message)
+
     st.caption(
         "Configure o módulo e a fonte de dados abaixo. O botão executa a janela atualmente preparada."
     )
@@ -671,7 +712,7 @@ def render_input_page() -> None:
 
     with right:
         with st.container(border=True):
-            panel_title("Fonte dos dados · Janela de 120 minutos")
+            panel_title("Fonte dos dados · Janela temporal")
             source = st.radio(
                 "Fonte",
                 options=("Carregar CSV", "Perfil sintético"),
@@ -759,27 +800,48 @@ def render_input_page() -> None:
                         preview_profile = None
 
             else:
-                s1, s2, s3, s4 = st.columns(4)
+                s1, s2, s3 = st.columns(3)
                 with s1:
                     synthetic_date = st.date_input("Data", value=date.today())
                 with s2:
                     synthetic_time = st.time_input("Hora inicial", value=time(12, 0))
-                profile_options = ["Día soleado", "Día nublado", "Día lluvioso"]
+                with s3:
+                    duration_minutes = st.selectbox(
+                        "Janela sintética",
+                        options=(120, 1440),
+                        format_func=lambda value: (
+                            "2 horas · 120 min" if value == 120 else "1 dia · 24 h"
+                        ),
+                    )
+
+                profile_options = [
+                    "Irradiância perfeita",
+                    "Día soleado",
+                    "Día nublado",
+                    "Día lluvioso",
+                ]
                 profile_display = {
+                    "Irradiância perfeita": "Irradiância perfeita · curva suave",
                     "Día soleado": "Dia ensolarado",
                     "Día nublado": "Dia nublado",
                     "Día lluvioso": "Dia chuvoso",
                 }
-                with s3:
+                s4, s5 = st.columns(2)
+                with s4:
                     irradiance_profile = st.selectbox(
                         "Condição solar",
                         profile_options,
                         format_func=lambda x: profile_display[x],
+                        help=(
+                            "Irradiância perfeita usa somente a curva solar suave, "
+                            "sem ruído nem quedas abruptas."
+                        ),
                     )
-                with s4:
+                with s5:
                     season = st.selectbox("Estação", list(PROFILES["seasons"].keys()), index=0)
 
                 defaults = {
+                    "Irradiância perfeita": PROFILES["g_peak_clear"],
                     "Día soleado": PROFILES["g_peak_clear"],
                     "Día nublado": PROFILES["g_peak_cloudy"],
                     "Día lluvioso": PROFILES["g_peak_rainy"],
@@ -803,15 +865,19 @@ def render_input_page() -> None:
                     st.error("A temperatura máxima deve ser maior ou igual à mínima.")
                 else:
                     synthetic_start = pd.Timestamp.combine(synthetic_date, synthetic_time)
-                    preview_profile = build_synthetic_profile_120min(
+                    preview_profile = build_synthetic_profile(
                         start=synthetic_start,
                         irradiance_profile=irradiance_profile,
                         season=season,
+                        duration_minutes=int(duration_minutes),
                         g_peak=float(g_peak),
                         t_min=float(t_min),
                         t_max=float(t_max),
                     )
-                    source_description = f"Sintético · {profile_display[irradiance_profile]}"
+                    source_description = (
+                        f"Sintético · {profile_display[irradiance_profile]} · "
+                        f"{_window_label(preview_profile)}"
+                    )
 
             if preview_profile is not None:
                 temp_ok = bool(preview_profile["Tamb"].notna().all())
@@ -834,7 +900,7 @@ def render_input_page() -> None:
                         "o modelo NOCT e o SDM serão marcados como indisponíveis."
                     )
     if run_requested and preview_profile is None:
-        st.warning("Prepare uma janela válida de 120 minutos antes de executar os modelos.")
+        show_run_notice("warning", "Prepare uma janela válida antes de executar os modelos.")
     elif run_requested:
         try:
             module = get_module(module_key)
@@ -881,17 +947,25 @@ def render_input_page() -> None:
                 "n_series": int(n_series),
                 "n_parallel": int(n_parallel),
                 "soiling_losses_pct": float(losses_pct),
+                "window_minutes": _window_minutes(preview_profile),
             }
             if len(results) == 3:
-                st.success("Execução concluída: os três modelos estão disponíveis nas abas de resultados.")
+                show_run_notice(
+                    "success",
+                    "Execução concluída: os três modelos estão disponíveis nas abas de resultados.",
+                )
             elif len(results) == 2:
-                st.warning("Execução concluída em modo degradado: 2 de 3 modelos estão disponíveis.")
+                show_run_notice(
+                    "warning",
+                    "Execução concluída em modo degradado: 2 de 3 modelos estão disponíveis.",
+                )
             else:
-                st.warning(
-                    "Execução concluída em modo degradado: o modelo simples gerou a janela completa."
+                show_run_notice(
+                    "warning",
+                    "Execução concluída em modo degradado: o modelo simples gerou a janela completa.",
                 )
         except Exception as exc:
-            st.error(f"Não foi possível executar os modelos: {exc}")
+            show_run_notice("error", f"Não foi possível executar os modelos: {exc}")
 
 
 def _empty_results(message: str) -> bool:
@@ -1046,7 +1120,7 @@ def render_models_page() -> None:
                             key="sdm_iv_pv_peak",
                         )
 
-            with st.expander("Ver tabela completa de resultados (120 linhas)"):
+            with st.expander(f"Ver tabela completa de resultados ({len(result)} linhas)"):
                 preferred = [
                     "G", "G_eff", "Tamb", "Tc", "P_module", "P_array", "eta",
                     "Vmp", "Imp", "Voc", "Isc", "FF",
@@ -1089,6 +1163,7 @@ def render_comparison_page() -> None:
     results = st.session_state["results_by_model"]
     statuses = st.session_state["model_statuses"]
     kpis = st.session_state["kpis_by_model"]
+    profile = st.session_state["profile"]
 
     status_cols = st.columns(3)
     for col, model_id in zip(status_cols, MODEL_ORDER):
@@ -1124,7 +1199,7 @@ def render_comparison_page() -> None:
     q1.metric("Modelos comparados", f"{len(results)}")
     q2.metric("Dispersão de energia", f"{energy_spread:.4f} kWh", f"{energy_spread_pct:.2f} % da média")
     q3.metric("Dispersão de pico", f"{peak_spread:.1f} W")
-    q4.metric("Janela", "120 min", "1 minuto por passo")
+    q4.metric("Janela", _window_label(profile), "1 minuto por passo")
 
     with st.container(border=True):
         panel_title("Potência · Sobreposição dos modelos")
@@ -1220,7 +1295,7 @@ def render_export_page() -> None:
             )
             file_name = st.text_input(
                 "Nome do arquivo",
-                value=f"modelo_solar_{selected_model}_120min",
+                value=f"modelo_solar_{selected_model}_{_window_slug(selected_results)}",
                 key=f"export_name_{selected_model}",
             )
             separator_label = st.selectbox("Separador", ("Vírgula (,) ", "Ponto e vírgula (;)")).strip()
@@ -1231,7 +1306,7 @@ def render_export_page() -> None:
 
             st.markdown(
                 '<div class="status-row">'
-                + status_chip("120 linhas", "ok")
+                + status_chip(f"{len(selected_results)} linhas", "ok")
                 + status_chip(f"{len(selected_columns)} colunas", "info")
                 + status_chip(MODEL_SHORT_LABELS[selected_model], "info")
                 + "</div>",

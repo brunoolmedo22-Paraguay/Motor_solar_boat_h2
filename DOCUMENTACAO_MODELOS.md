@@ -18,6 +18,11 @@ Todos os modelos recebem o mesmo perfil temporal e a mesma configuração:
 
 A potência do arranjo é a potência de um módulo multiplicada por `N`.
 
+O CSV é processado em janelas de 120 minutos. Para estudos sintéticos, a mesma
+resolução de um minuto pode ser usada em uma janela de 120 minutos ou em um dia
+completo de 1.440 amostras. A opção de irradiância perfeita usa apenas a
+envoltória solar suave, sem perturbações aleatórias.
+
 ## 2. Modelo 1 — irradiância
 
 O modelo supõe uma relação linear entre irradiância e potência:

@@ -13,6 +13,7 @@ from simulation.multimodel import (
     MODEL_SDM,
     MODEL_SIMPLE,
     build_export_dataframe,
+    build_synthetic_profile,
     compute_model_kpis,
     prepare_uploaded_profile,
     run_all_models,
@@ -87,6 +88,33 @@ class MultiModelPhysicsTests(unittest.TestCase):
 
 
 class InputContractTests(unittest.TestCase):
+    def test_synthetic_profile_supports_a_full_day(self):
+        profile = build_synthetic_profile(
+            start="2026-03-21 00:00:00",
+            irradiance_profile="Irradiância perfeita",
+            season="Verano",
+            duration_minutes=1440,
+        )
+        self.assertEqual(len(profile), 1440)
+        self.assertEqual(profile.attrs["duration_minutes"], 1440)
+        self.assertEqual(profile.index.min(), pd.Timestamp("2026-03-21 00:00:00"))
+        self.assertEqual(profile.index.max(), pd.Timestamp("2026-03-21 23:59:00"))
+
+    def test_perfect_irradiance_is_a_smooth_single_peak_curve(self):
+        profile = build_synthetic_profile(
+            start="2026-03-21 00:00:00",
+            irradiance_profile="Irradiância perfeita",
+            season="Verano",
+            duration_minutes=1440,
+            g_peak=1000.0,
+        )
+        daylight = profile.loc[profile["G"] > 0, "G"].to_numpy(dtype=float)
+        peak = int(np.argmax(daylight))
+        self.assertGreater(len(daylight), 600)
+        self.assertTrue((np.diff(daylight[: peak + 1]) >= -1e-9).all())
+        self.assertTrue((np.diff(daylight[peak:]) <= 1e-9).all())
+        self.assertAlmostEqual(float(daylight.max()), 1000.0, places=8)
+
     def test_csv_without_temperature_is_valid_for_degraded_mode(self):
         index = pd.date_range("2026-03-21 06:01:00", periods=120, freq="1min")
         raw = pd.DataFrame({"timestamp": index, "GHI": np.linspace(0, 800, 120)})

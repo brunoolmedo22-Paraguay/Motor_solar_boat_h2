@@ -29,12 +29,19 @@ class AppSmokeTest(unittest.TestCase):
         next(radio for radio in app.radio if radio.label == "Fonte").set_value(
             "Perfil sintético"
         ).run()
+        duration = next(selectbox for selectbox in app.selectbox if selectbox.label == "Janela sintética")
+        condition = next(selectbox for selectbox in app.selectbox if selectbox.label == "Condição solar")
+        self.assertEqual(len(duration.options), 2)
+        self.assertIn("Irradiância perfeita · curva suave", condition.options)
+        duration.set_value(1440).run()
         next(button for button in app.button if button.label == "▶ RODAR MODELOS").click().run()
         self.assertEqual(len(app.exception), 0)
+        self.assertEqual(len(app.session_state["profile"]), 1440)
         self.assertEqual(
             set(app.session_state["results_by_model"]),
             {"irradiancia", "noct_eficiencia", "sdm"},
         )
+        self.assertEqual(app.session_state["last_run_notice"]["kind"], "success")
 
         for page in ("Modelos", "Comparação", "Exportação", "Visão geral"):
             next(button for button in app.button if button.label == page).click().run()

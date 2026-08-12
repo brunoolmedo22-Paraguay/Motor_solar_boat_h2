@@ -1,8 +1,9 @@
 """Motor comum dos três modelos fotovoltaicos.
 
-O módulo implementa uma janela operacional fixa de 120 minutos, com passo de
-um minuto, e mantém todos os modelos sobre a mesma irradiância, temperatura,
-módulo e arranjo elétrico.
+O módulo mantém todos os modelos sobre a mesma irradiância, temperatura,
+módulo e arranjo elétrico. O CSV conserva a janela operacional de 120 minutos;
+o gerador sintético também pode produzir um dia completo, sempre com passo de
+um minuto.
 
 Modelos:
     1. Irradiância: P = P_STC * G/G_STC.
@@ -178,19 +179,23 @@ def prepare_uploaded_profile(
     return profile
 
 
-def build_synthetic_profile_120min(
+def build_synthetic_profile(
     *,
     start: pd.Timestamp | str,
     irradiance_profile: str,
     season: str,
+    duration_minutes: int = WINDOW_MINUTES,
     g_peak: float | None = None,
     t_min: float | None = None,
     t_max: float | None = None,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Cria um perfil sintético reproduzível de 120 minutos a cada 1 minuto."""
+    """Cria um perfil sintético reproduzível com passo de um minuto."""
+    duration_minutes = int(duration_minutes)
+    if duration_minutes <= 0:
+        raise ValueError("A duração do perfil sintético deve ser maior que zero.")
     idx = pd.date_range(
-        start=pd.Timestamp(start), periods=WINDOW_MINUTES, freq="1min", name="timestamp"
+        start=pd.Timestamp(start), periods=duration_minutes, freq="1min", name="timestamp"
     )
     hours = idx.hour + idx.minute / 60.0 + idx.second / 3600.0
     g = generate_irradiance(
@@ -220,8 +225,32 @@ def build_synthetic_profile_120min(
         timestep_minutes=TIMESTEP_MINUTES,
         irradiance_profile=irradiance_profile,
         season=season,
+        duration_minutes=duration_minutes,
     )
     return profile
+
+
+def build_synthetic_profile_120min(
+    *,
+    start: pd.Timestamp | str,
+    irradiance_profile: str,
+    season: str,
+    g_peak: float | None = None,
+    t_min: float | None = None,
+    t_max: float | None = None,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Compatibilidade: cria a janela sintética original de 120 minutos."""
+    return build_synthetic_profile(
+        start=start,
+        irradiance_profile=irradiance_profile,
+        season=season,
+        duration_minutes=WINDOW_MINUTES,
+        g_peak=g_peak,
+        t_min=t_min,
+        t_max=t_max,
+        seed=seed,
+    )
 
 
 def _common_result(
@@ -306,7 +335,7 @@ def simulate_noct_efficiency_model(
 ) -> pd.DataFrame:
     """Modelo 2: temperatura NOCT e eficiência corrigida por gamma_Pmax."""
     if "Tamb" not in profile or profile["Tamb"].isna().any():
-        raise ValueError("O modelo NOCT + eficiência requer Tamb completa nos 120 minutos.")
+        raise ValueError("O modelo NOCT + eficiência requer Tamb completa em toda a janela.")
     out, g_eff, n_modules = _common_result(
         module,
         profile,
@@ -346,7 +375,7 @@ def simulate_sdm_model(
     if module.sdm is None:
         raise ValueError("O módulo não possui parâmetros SDM.")
     if "Tamb" not in profile or profile["Tamb"].isna().any():
-        raise ValueError("O SDM requer Tamb completa nos 120 minutos.")
+        raise ValueError("O SDM requer Tamb completa em toda a janela.")
 
     out = simulate_timeseries(
         module,

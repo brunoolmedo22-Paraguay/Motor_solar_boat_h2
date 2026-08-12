@@ -6,7 +6,7 @@ mesmo datasheet.
 
 O software foi estruturado para manter a produção de uma estimativa mesmo em
 modo degradado: se a temperatura ambiente deixa de chegar no CSV, o modelo de
-irradiância continua operando durante toda a janela de 120 minutos. Os modelos
+irradiância continua operando durante toda a janela selecionada. Os modelos
 térmico e SDM são marcados como indisponíveis, sem criar valores artificiais.
 
 ## Modelos implementados
@@ -59,7 +59,8 @@ A aplicação possui cinco seções, acessadas por botões próprios no sidebar:
 1. **Visão geral** — explicação da conversão fotovoltaica, das equações dos
    três modelos, do fluxo paralelo e da lógica de confiabilidade.
 2. **Entrada** — botão `RODAR MODELOS` no topo, seleção do módulo e do arranjo,
-   upload de CSV ou perfil sintético e validação da janela.
+   upload de CSV ou perfil sintético de 120 minutos/24 horas, curva solar
+   perfeita sem ruído e validação da janela.
 3. **Modelos** — três abas independentes com KPIs, potência, energia,
    comportamento térmico, eficiência e curvas I-V/P-V do SDM.
 4. **Comparação** — sobreposição de potência, energia e eficiência, diferença
@@ -69,7 +70,7 @@ A aplicação possui cinco seções, acessadas por botões próprios no sidebar:
 
 ## Contrato da entrada
 
-Cada execução usa exatamente:
+Para o CSV, cada execução mantém o contrato operacional original:
 
 - 120 linhas;
 - passo temporal de 1 minuto;
@@ -77,6 +78,10 @@ Cada execução usa exatamente:
 - `timestamp` obrigatório;
 - irradiância obrigatória;
 - temperatura ambiente opcional.
+
+O perfil sintético usa o mesmo passo de 1 minuto e permite escolher entre
+120 minutos (2 horas) e 1.440 minutos (24 horas). A condição **Irradiância
+perfeita** produz a envoltória solar diária suave, sem ruído ou quedas abruptas.
 
 Exemplo com temperatura:
 
@@ -169,7 +174,8 @@ Os testes verificam:
 - convergência da extração SDM;
 - potência nominal do modelo simples em irradiância STC;
 - derating térmico do modelo NOCT;
-- execução SDM dos 120 minutos;
+- execução SDM da janela completa;
+- geração sintética de 24 horas e suavidade da irradiância perfeita;
 - modo degradado sem temperatura;
 - contrato do CSV;
 - consistência dos KPIs e da exportação;

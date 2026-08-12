@@ -26,7 +26,12 @@ from config.settings import PROFILES, UI
 
 PROFILE_LOADER_API_VERSION = "2026.07.22.2"
 
-IRRADIANCE_PROFILES = ["Día soleado", "Día nublado", "Día lluvioso"]
+IRRADIANCE_PROFILES = [
+    "Irradiância perfeita",
+    "Día soleado",
+    "Día nublado",
+    "Día lluvioso",
+]
 SEASONS = list(PROFILES["seasons"].keys())
 
 
@@ -67,7 +72,11 @@ def generate_irradiance(
     """Genera G(t) [W/m²] según el perfil característico solicitado."""
     rng = np.random.default_rng(seed)
 
-    if profile == "Día soleado":
+    if profile == "Irradiância perfeita":
+        peak = g_peak or PROFILES["g_peak_clear"]
+        g = _clear_sky_envelope(hours, sunrise, sunset, peak)
+
+    elif profile == "Día soleado":
         peak = g_peak or PROFILES["g_peak_clear"]
         g = _clear_sky_envelope(hours, sunrise, sunset, peak)
         g = g * (1.0 + 0.01 * rng.standard_normal(g.size))
