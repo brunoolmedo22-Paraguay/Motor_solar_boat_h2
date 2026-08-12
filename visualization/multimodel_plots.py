@@ -95,7 +95,12 @@ def plot_input_profile(profile: pd.DataFrame) -> go.Figure:
     )
 
 
-def plot_model_power(results: pd.DataFrame, model_id: str) -> go.Figure:
+def plot_model_power(
+    results: pd.DataFrame,
+    model_id: str,
+    *,
+    height: int = 236,
+) -> go.Figure:
     color = MODEL_COLORS[model_id]
     fig = go.Figure()
     fig.add_trace(
@@ -110,7 +115,12 @@ def plot_model_power(results: pd.DataFrame, model_id: str) -> go.Figure:
             hovertemplate="%{y:.2f} W<extra>Potência</extra>",
         )
     )
-    return _finish(fig, ytitle="Potência do arranjo [W]", showlegend=False)
+    return _finish(
+        fig,
+        ytitle="Potência do arranjo [W]",
+        height=height,
+        showlegend=False,
+    )
 
 
 def plot_cumulative_energy(results: pd.DataFrame, model_id: str) -> go.Figure:

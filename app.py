@@ -133,6 +133,12 @@ APP_CSS = """
     padding:1rem 1.1rem; color:#536575; font-size:.78rem; line-height:1.55;
   }
   .compact-note b { color:#203746; font-size:.85rem; margin-bottom:.25rem; }
+  .model-page-title { color:#111A22; font-size:1.42rem; line-height:1.08; font-weight:900; margin:.2rem 0 .3rem; }
+  .model-page-subtitle { color:#718096; font-size:.75rem; line-height:1.45; margin-bottom:.22rem; }
+  .config-facts { display:grid; grid-template-columns:1fr 1fr; gap:.42rem; margin:.18rem 0 .12rem; }
+  .config-fact { border:1px solid #E0E6EB; border-radius:7px; background:#FBFCFD; padding:.46rem .52rem; }
+  .config-fact small { display:block; color:#788896; font-size:.57rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
+  .config-fact b { display:block; color:#20313F; font-size:.72rem; margin-top:.12rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   .overview-lead { color:#3E4C59; font-size:.93rem; line-height:1.72; margin:.15rem 0 .8rem; }
   .overview-lead b { color:#17222D; }
@@ -278,6 +284,7 @@ def init_state() -> None:
         "extraction_report": None,
         "current_page": NAV_OVERVIEW,
         "last_run_notice": None,
+        "selected_result_model": MODEL_SDM,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -1027,121 +1034,151 @@ def _formula_for(model_id: str) -> None:
 
 
 def render_models_page() -> None:
-    page_header(
-        "Modelos · Resultados individuais",
-        "TRÊS NÍVEIS DE COMPLEXIDADE",
-        "Cada aba mostra os resultados do mesmo módulo, arranjo e janela meteorológica.",
-    )
     if _empty_results("Execute uma janela na seção Entrada para visualizar os modelos."):
         return
 
     results_by_model = st.session_state["results_by_model"]
-    statuses = st.session_state["model_statuses"]
     kpis_by_model = st.session_state["kpis_by_model"]
     module = st.session_state["module"]
-    tabs = st.tabs([MODEL_LABELS[mid] for mid in MODEL_ORDER])
+    profile = st.session_state["profile"]
+    available_models = [model_id for model_id in MODEL_ORDER if model_id in results_by_model]
+    if st.session_state.get("selected_result_model") not in available_models:
+        st.session_state["selected_result_model"] = available_models[0]
 
-    for tab, model_id in zip(tabs, MODEL_ORDER):
-        with tab:
-            status = statuses.get(model_id)
-            if model_id not in results_by_model:
-                reason = status.message if status is not None else "Modelo não executado."
-                st.warning(reason)
+    controls, main_chart = st.columns([0.62, 1.78], gap="small")
+    with controls:
+        with st.container(border=True):
+            panel_title("Modelos · Resultados individuais")
+            st.markdown(
+                """
+                <div class="model-page-title">MODELOS FOTOVOLTAICOS</div>
+                <div class="model-page-subtitle">
+                  Potência, energia e comportamento físico da mesma janela meteorológica.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with st.container(border=True, height="stretch"):
+            panel_title("Configurações · Modelo analisado")
+            selected_model = st.selectbox(
+                "Modelo analisado",
+                options=available_models,
+                format_func=lambda model_id: MODEL_LABELS[model_id],
+                key="selected_result_model",
+                help="Escolha qual dos modelos disponíveis alimentará todos os painéis desta página.",
+            )
+            st.markdown(
+                f"""
+                <div class="config-facts">
+                  <div class="config-fact"><small>Módulo</small><b>{module.stc.model}</b></div>
+                  <div class="config-fact"><small>Janela</small><b>{_window_label(profile)} · passo 1 min</b></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            chips = []
+            for model_id in MODEL_ORDER:
+                available = model_id in results_by_model
+                chips.append(
+                    status_chip(
+                        ("● " if available else "○ ") + MODEL_SHORT_LABELS[model_id],
+                        "ok" if available else "warn",
+                    )
+                )
+            st.markdown(
+                '<div class="status-row">' + "".join(chips) + "</div>",
+                unsafe_allow_html=True,
+            )
+            _formula_for(selected_model)
+
+    result = results_by_model[selected_model]
+    kpi = kpis_by_model[selected_model]
+    with main_chart:
+        with st.container(border=True, height="stretch"):
+            panel_title(f"Curva principal · Potência gerada · {MODEL_SHORT_LABELS[selected_model]}")
+            st.plotly_chart(
+                plot_model_power(result, selected_model, height=330),
+                width="stretch",
+                config=CHART_CONFIG,
+                key=f"power_main_{selected_model}",
+            )
+
+    with st.container(border=True):
+        panel_title("Síntese · Indicadores do modelo selecionado")
+        _metric_row(selected_model, result, kpi)
+
+    energy_col, thermal_col, efficiency_col = st.columns(3, gap="small")
+    with energy_col:
+        with st.container(border=True, height="stretch"):
+            panel_title("Energia · Acumulada na janela")
+            st.plotly_chart(
+                plot_cumulative_energy(result, selected_model),
+                width="stretch",
+                config=CHART_CONFIG,
+                key=f"energy_{selected_model}",
+            )
+    with thermal_col:
+        with st.container(border=True, height="stretch"):
+            panel_title("Comportamento térmico")
+            if selected_model == MODEL_SIMPLE:
                 st.markdown(
-                    '<div class="formula-box">O resultado não foi estimado nem preenchido. '
-                    "Isso preserva a rastreabilidade do modo degradado.</div>",
+                    """
+                    <div class="compact-note">
+                      <b>Operação independente de temperatura</b>
+                      Este modelo não calcula temperatura de célula. Por isso, continua
+                      entregando potência quando a coluna Tamb fica indisponível.
+                    </div>
+                    """,
                     unsafe_allow_html=True,
                 )
-                continue
+            else:
+                st.plotly_chart(
+                    plot_temperatures(result),
+                    width="stretch",
+                    config=CHART_CONFIG,
+                    key=f"temperature_{selected_model}",
+                )
+    with efficiency_col:
+        with st.container(border=True, height="stretch"):
+            panel_title("Eficiência · Evolução temporal")
+            st.plotly_chart(
+                plot_efficiency(result, selected_model),
+                width="stretch",
+                config=CHART_CONFIG,
+                key=f"efficiency_{selected_model}",
+            )
 
-            result = results_by_model[model_id]
-            kpi = kpis_by_model[model_id]
-            _formula_for(model_id)
-            _metric_row(model_id, result, kpi)
+    if selected_model == MODEL_SDM:
+        peak_ts = result["P_array"].idxmax()
+        peak = result.loc[peak_ts]
+        with st.expander(
+            f"Diagnóstico elétrico avançado do SDM · pico às {peak_ts:%H:%M}",
+            expanded=False,
+        ):
+            e1, e2, e3, e4 = st.columns(4)
+            e1.metric("Vmp do arranjo", f"{peak['Vmp_array']:.2f} V")
+            e2.metric("Imp do arranjo", f"{peak['Imp_array']:.3f} A")
+            e3.metric("Voc do arranjo", f"{peak['Voc_array']:.2f} V")
+            e4.metric("Fator de forma", f"{peak['FF']:.4f}")
+            if peak["G_eff"] > 0:
+                panel_title("Curvas I-V e P-V no ponto de maior potência")
+                st.plotly_chart(
+                    plot_iv_pv_at_peak(module, result),
+                    width="stretch",
+                    config=CHART_CONFIG,
+                    key="sdm_iv_pv_peak",
+                )
 
-            c1, c2 = st.columns([1.24, .76], gap="small")
-            with c1:
-                with st.container(border=True, height="stretch"):
-                    panel_title("Potência · Série temporal")
-                    st.plotly_chart(
-                        plot_model_power(result, model_id),
-                        width="stretch",
-                        config=CHART_CONFIG,
-                        key=f"power_{model_id}",
-                    )
-            with c2:
-                with st.container(border=True, height="stretch"):
-                    panel_title("Energia · Acumulada na janela")
-                    st.plotly_chart(
-                        plot_cumulative_energy(result, model_id),
-                        width="stretch",
-                        config=CHART_CONFIG,
-                        key=f"energy_{model_id}",
-                    )
-
-            d1, d2 = st.columns(2, gap="small")
-            with d1:
-                with st.container(border=True, height="stretch"):
-                    panel_title("Comportamento térmico")
-                    if model_id == MODEL_SIMPLE:
-                        st.markdown(
-                            """
-                            <div class="compact-note">
-                              <b>Operação independente de temperatura</b>
-                              Este modelo não calcula temperatura de célula. Por isso, continua
-                              entregando potência quando a coluna Tamb fica indisponível — sua função
-                              principal é garantir continuidade em modo degradado.
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        st.plotly_chart(
-                            plot_temperatures(result),
-                            width="stretch",
-                            config=CHART_CONFIG,
-                            key=f"temperature_{model_id}",
-                        )
-            with d2:
-                with st.container(border=True, height="stretch"):
-                    panel_title("Eficiência · Evolução temporal")
-                    st.plotly_chart(
-                        plot_efficiency(result, model_id),
-                        width="stretch",
-                        config=CHART_CONFIG,
-                        key=f"efficiency_{model_id}",
-                    )
-
-            if model_id == MODEL_SDM:
-                peak_ts = result["P_array"].idxmax()
-                peak = result.loc[peak_ts]
-                with st.expander(
-                    f"Diagnóstico elétrico avançado do SDM · pico às {peak_ts:%H:%M}",
-                    expanded=False,
-                ):
-                    e1, e2, e3, e4 = st.columns(4)
-                    e1.metric("Vmp do arranjo", f"{peak['Vmp_array']:.2f} V")
-                    e2.metric("Imp do arranjo", f"{peak['Imp_array']:.3f} A")
-                    e3.metric("Voc do arranjo", f"{peak['Voc_array']:.2f} V")
-                    e4.metric("Fator de forma", f"{peak['FF']:.4f}")
-                    if peak["G_eff"] > 0:
-                        panel_title("Curvas I-V e P-V no ponto de maior potência")
-                        st.plotly_chart(
-                            plot_iv_pv_at_peak(module, result),
-                            width="stretch",
-                            config=CHART_CONFIG,
-                            key="sdm_iv_pv_peak",
-                        )
-
-            with st.expander(f"Ver tabela completa de resultados ({len(result)} linhas)"):
-                preferred = [
-                    "G", "G_eff", "Tamb", "Tc", "P_module", "P_array", "eta",
-                    "Vmp", "Imp", "Voc", "Isc", "FF",
-                ]
-                cols = [col for col in preferred if col in result.columns]
-                display = result[cols].copy()
-                display.index = display.index.strftime("%Y-%m-%d %H:%M:%S")
-                st.dataframe(display, width="stretch", height=310)
+    with st.expander(f"Ver tabela completa de resultados ({len(result)} linhas)"):
+        preferred = [
+            "G", "G_eff", "Tamb", "Tc", "P_module", "P_array", "eta",
+            "Vmp", "Imp", "Voc", "Isc", "FF",
+        ]
+        cols = [col for col in preferred if col in result.columns]
+        display = result[cols].copy()
+        display.index = display.index.strftime("%Y-%m-%d %H:%M:%S")
+        st.dataframe(display, width="stretch", height=310)
 
 
 def _comparison_table(results_by_model: dict, kpis_by_model: dict) -> pd.DataFrame:
