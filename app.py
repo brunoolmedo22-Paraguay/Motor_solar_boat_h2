@@ -142,12 +142,29 @@ APP_CSS = """
   .config-fact small { display:block; color:#788896; font-size:.57rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
   .config-fact b { display:block; color:#20313F; font-size:.72rem; margin-top:.12rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  .overview-lead { color:#3E4C59; font-size:.93rem; line-height:1.72; margin:.15rem 0 .8rem; }
-  .overview-lead b { color:#17222D; }
-  .overview-note {
-    border:1px solid #CFE3EF; background:#F1F8FC; border-radius:9px;
-    padding:.72rem .82rem; color:#31536A; font-size:.78rem; line-height:1.55;
+  .overview-hero-copy {
+    color:#40515F; font-size:.95rem; line-height:1.68; margin:.8rem 0 .78rem;
+    max-width:760px;
   }
+  .overview-hero-copy b { color:#17222D; }
+  .overview-hero-title {
+    color:#101A22; font-size:2rem; line-height:1.04; font-weight:920;
+    letter-spacing:-.035em; margin:.34rem 0 .28rem;
+  }
+  .overview-hero-subtitle { color:#617383; font-size:.88rem; line-height:1.5; }
+  .overview-hero-note {
+    border-left:3px solid #1380AC; background:#F1F8FC; border-radius:0 8px 8px 0;
+    padding:.68rem .8rem; color:#31536A; font-size:.78rem; line-height:1.52;
+  }
+  .overview-section-head { margin:1.05rem 0 .58rem; }
+  .overview-section-head small {
+    display:block; color:#00699A; font-size:.67rem; font-weight:850;
+    letter-spacing:.14em; text-transform:uppercase; margin-bottom:.2rem;
+  }
+  .overview-section-head b {
+    display:block; color:#17222D; font-size:1.18rem; line-height:1.18; font-weight:900;
+  }
+  .overview-section-head span { display:block; color:#718096; font-size:.77rem; margin-top:.2rem; }
   [data-testid="stImage"] img { border-radius:9px; border:1px solid #DCE5EC; }
   .explain-tag {
     display:inline-flex; align-items:center; border-radius:999px; padding:.26rem .55rem;
@@ -157,31 +174,48 @@ APP_CSS = """
   .tag-blue { color:#1766A3; background:#E9F3FC; border:1px solid #C6DFF3; }
   .tag-green { color:#087A55; background:#E8F7F1; border:1px solid #BCE9D8; }
   .tag-orange { color:#A55C00; background:#FFF3E2; border:1px solid #F2D3A5; }
-  .model-explainer-title { color:#17222D; font-weight:900; font-size:1.02rem; margin:.1rem 0 .4rem; }
-  .model-explainer-text { color:#5F6F7E; font-size:.78rem; line-height:1.55; min-height:74px; }
-  .needs-line { color:#748391; font-size:.68rem; margin-top:.55rem; margin-bottom:.55rem; }
+  .model-explainer-title { color:#17222D; font-weight:900; font-size:1.08rem; margin:.1rem 0 .42rem; }
+  .model-explainer-text { color:#526575; font-size:.82rem; line-height:1.58; min-height:68px; }
+  .needs-line {
+    color:#657786; font-size:.72rem; line-height:1.4; margin-top:.48rem; margin-bottom:.42rem;
+    border-top:1px solid #E6EBEF; padding-top:.5rem;
+  }
   .needs-line b { color:#3A4C5C; }
 
-  .flow-shell {
-    border:1px solid #DCE3E9; border-radius:10px; background:#FAFCFD;
-    padding:1rem; text-align:center;
+  .process-band {
+    display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+    gap:.55rem; align-items:stretch; border:1px solid #D8E2E9; border-radius:10px;
+    background:linear-gradient(90deg,#F7FBFD 0%,#FFFFFF 50%,#F8FBFA 100%);
+    padding:.72rem;
   }
-  .flow-node {
-    border:1px solid #C7D9E5; border-radius:9px; background:#FFFFFF;
-    padding:.68rem .75rem; color:#17222D;
+  .process-step {
+    min-height:76px; display:flex; flex-direction:column; justify-content:center;
+    border-radius:8px; padding:.62rem .72rem; background:#FFFFFF;
   }
-  .flow-node small { display:block; color:#08729E; font-size:.61rem; font-weight:850; letter-spacing:.11em; margin-bottom:.2rem; }
-  .flow-node b { display:block; font-size:.8rem; }
-  .flow-arrow { color:#3B7A9D; font-size:1.35rem; line-height:1; padding:.3rem 0; font-weight:900; }
-  .flow-parallel { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
-  .flow-model { border-radius:9px; padding:.72rem .58rem; background:#FFFFFF; }
-  .flow-model b { display:block; color:#17222D; font-size:.76rem; }
-  .flow-model span { display:block; color:#70808E; font-size:.65rem; margin-top:.18rem; }
-  .flow-blue { border:1px solid #BFD9F0; border-top:3px solid #2F80ED; }
-  .flow-green { border:1px solid #BDE5D7; border-top:3px solid #16A085; }
-  .flow-orange { border:1px solid #F2D2A9; border-top:3px solid #F2994A; }
-  .flow-outputs { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+  .process-step small {
+    display:block; color:#08729E; font-size:.6rem; font-weight:880;
+    letter-spacing:.11em; margin-bottom:.25rem;
+  }
+  .process-step b { display:block; color:#1D303D; font-size:.8rem; line-height:1.35; }
+  .process-step span { display:block; color:#71818E; font-size:.68rem; line-height:1.35; margin-top:.15rem; }
+  .process-input { border-left:3px solid #2F80ED; }
+  .process-models { border-left:3px solid #16A085; }
+  .process-decision { border-left:3px solid #F2994A; }
+  .process-output { border-left:3px solid #00699A; }
+  .process-arrow { align-self:center; color:#6E92A7; font-size:1.25rem; font-weight:900; }
 
+  .reliability-compact { display:grid; gap:.48rem; }
+  .reliability-item {
+    display:grid; grid-template-columns:34px 1fr; gap:.65rem; align-items:start;
+    border-bottom:1px solid #E7EBEF; padding:.18rem 0 .55rem;
+  }
+  .reliability-item:last-child { border-bottom:0; padding-bottom:.12rem; }
+  .reliability-index {
+    display:grid; place-items:center; width:30px; height:30px; border-radius:8px;
+    background:#EAF5FB; color:#00699A; font-size:.67rem; font-weight:900;
+  }
+  .reliability-item b { display:block; color:#223542; font-size:.82rem; }
+  .reliability-item p { color:#617281; font-size:.73rem; line-height:1.45; margin:.1rem 0 0; }
   .reliability-list { margin:.15rem 0 0; padding-left:1.05rem; color:#536575; font-size:.8rem; line-height:1.65; }
   .reliability-list li { margin-bottom:.32rem; }
   .reliability-list b { color:#243746; }
@@ -196,6 +230,10 @@ APP_CSS = """
   .result-ok { color:#087A55; }
   .result-warn { color:#A66A00; }
   .result-stop { color:#B33A3A; }
+  .overview-detail-note {
+    color:#536575; font-size:.8rem; line-height:1.62; padding:.15rem .1rem .25rem;
+  }
+  .overview-detail-note b { color:#243746; }
   div[data-testid="stLaTeX"] { font-size:.87rem; }
 
   div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -243,9 +281,11 @@ APP_CSS = """
 
   @media (max-width: 900px) {
     .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .flow-parallel, .flow-outputs { grid-template-columns:1fr; }
+    .process-band { grid-template-columns:1fr; }
+    .process-arrow { transform:rotate(90deg); justify-self:center; }
     .availability-row { grid-template-columns:1fr; }
     .availability-result { text-align:left; }
+    .overview-hero-title { font-size:1.6rem; }
     .block-container { padding-left:1rem; padding-right:1rem; }
   }
 </style>
@@ -432,28 +472,24 @@ def _default_index(options: list, value) -> int:
 
 
 def render_overview_page() -> None:
-    page_header(
-        "Visão geral · Fundamentos e arquitetura",
-        "DO SOL À POTÊNCIA ELÉTRICA",
-        "Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.",
-    )
-
-    intro, visual = st.columns([1.58, 0.62], gap="small")
-    with intro:
-        with st.container(border=True, height="stretch"):
-            panel_title("Conceito · O que é um modelo solar?")
+    with st.container(border=True):
+        hero_text, hero_visual = st.columns([1.16, 0.84], gap="large", vertical_alignment="center")
+        with hero_text:
             st.markdown(
                 """
-                <div class="overview-lead">
-                  Um <b>modelo solar fotovoltaico</b> é uma representação matemática que transforma
-                  condições ambientais e informações do painel em uma estimativa da potência elétrica disponível.
-                  Ele conecta o que chega do ambiente — principalmente <b>irradiância</b> e
-                  <b>temperatura</b> — ao comportamento do módulo selecionado no datasheet.
+                <div class="eyebrow">Visão geral · Fundamentos e arquitetura</div>
+                <div class="overview-hero-title">DO SOL À POTÊNCIA ELÉTRICA</div>
+                <div class="overview-hero-subtitle">
+                  Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.
                 </div>
-                <div class="overview-note">
-                  Nesta plataforma, todos os modelos recebem a mesma <b>janela temporal selecionada</b>,
-                  o mesmo arranjo e o mesmo módulo. Assim, qualquer diferença observada vem da
-                  formulação matemática, e não de entradas diferentes.
+                <div class="overview-hero-copy">
+                  Um <b>modelo solar fotovoltaico</b> transforma condições ambientais e dados do painel
+                  em potência elétrica estimada. Ele conecta a <b>irradiância</b> e a
+                  <b>temperatura</b> ao comportamento publicado no datasheet do módulo.
+                </div>
+                <div class="overview-hero-note">
+                  Os três modelos recebem a <b>mesma janela temporal</b>, o mesmo arranjo e o mesmo módulo.
+                  Portanto, as diferenças de saída vêm da formulação de cada modelo — não de entradas distintas.
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -462,19 +498,23 @@ def render_overview_page() -> None:
                 '<div class="status-row">'
                 + status_chip("Entrada comum", "info")
                 + status_chip("3 modelos em paralelo", "ok")
-                + status_chip("Saída rastreável", "info")
+                + status_chip("Continuidade degradada", "warn")
                 + "</div>",
                 unsafe_allow_html=True,
             )
+        with hero_visual:
+            st.image("assets/fluxo_fotovoltaico.jpg", width="stretch")
 
-    with visual:
-        with st.container(border=True, height="stretch"):
-            panel_title("Conversão fotovoltaica · Irradiância → eletricidade")
-            image_left, image_body, image_right = st.columns([0.06, 0.88, 0.06])
-            with image_body:
-                st.image("assets/fluxo_fotovoltaico.jpg", width="stretch")
-
-    panel_title("Três modelos · Mesma entrada, três níveis de complexidade")
+    st.markdown(
+        """
+        <div class="overview-section-head">
+          <small>Três modelos · Uma arquitetura</small>
+          <b>Da linha de base ao modelo físico</b>
+          <span>Cada nível acrescenta informação e detalhe sem abandonar a saída mais simples.</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     model_1, model_2, model_3 = st.columns(3, gap="medium")
 
     with model_1:
@@ -482,13 +522,13 @@ def render_overview_page() -> None:
             st.markdown('<span class="explain-tag tag-blue">Modelo 1 · Continuidade</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">Irradiância</div>', unsafe_allow_html=True)
             st.markdown(
-                '<div class="model-explainer-text">Escala diretamente a potência de pico do datasheet '
-                "pela irradiância efetiva. É rápido, transparente e não depende de temperatura.</div>",
+                '<div class="model-explainer-text">Linha de base operacional: escala a potência de pico '
+                "pela irradiância efetiva. É transparente, rápido e continua operando sem temperatura.</div>",
                 unsafe_allow_html=True,
             )
             st.latex(r"P_1(t)=N\,P_{STC}\,\frac{G_{ef}(t)}{G_{STC}}")
             st.markdown(
-                '<div class="needs-line"><b>Precisa:</b> timestamp + GHI + potência STC.</div>',
+                '<div class="needs-line"><b>Entrada mínima:</b> timestamp + GHI + potência STC.</div>',
                 unsafe_allow_html=True,
             )
 
@@ -497,14 +537,14 @@ def render_overview_page() -> None:
             st.markdown('<span class="explain-tag tag-green">Modelo 2 · Térmico</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">NOCT + eficiência</div>', unsafe_allow_html=True)
             st.markdown(
-                '<div class="model-explainer-text">Calcula a temperatura da célula com o NOCT e '
-                "corrige a eficiência pelo coeficiente térmico de potência publicado no datasheet.</div>",
+                '<div class="model-explainer-text">Acrescenta o efeito térmico: estima a temperatura '
+                "da célula pelo NOCT e corrige a eficiência com o coeficiente de potência.</div>",
                 unsafe_allow_html=True,
             )
             st.latex(r"T_c=T_{amb}+\frac{NOCT-20}{800}G_{ef}")
             st.latex(r"P_2=N\,\eta_{STC}[1+\gamma_P(T_c-25)]\,G_{ef}A")
             st.markdown(
-                '<div class="needs-line"><b>Precisa:</b> GHI + Tamb + NOCT + área + γPmax.</div>',
+                '<div class="needs-line"><b>Entrada adicional:</b> Tamb + NOCT + área + γPmax.</div>',
                 unsafe_allow_html=True,
             )
 
@@ -513,8 +553,8 @@ def render_overview_page() -> None:
             st.markdown('<span class="explain-tag tag-orange">Modelo 3 · Físico</span>', unsafe_allow_html=True)
             st.markdown('<div class="model-explainer-title">Single Diode Model</div>', unsafe_allow_html=True)
             st.markdown(
-                '<div class="model-explainer-text">Representa eletricamente o módulo, translada os '
-                "cinco parâmetros para cada condição e resolve numericamente o ponto de máxima potência.</div>",
+                '<div class="model-explainer-text">Representa o circuito elétrico do módulo, ajusta '
+                "cinco parâmetros às condições medidas e resolve numericamente o ponto de máxima potência.</div>",
                 unsafe_allow_html=True,
             )
             st.latex(
@@ -522,86 +562,81 @@ def render_overview_page() -> None:
             )
             st.latex(r"P_3(t)=N\,\max_V\{V\,I(V)\}")
             st.markdown(
-                '<div class="needs-line"><b>Precisa:</b> GHI + Tamb + parâmetros elétricos do módulo.</div>',
+                '<div class="needs-line"><b>Entrada completa:</b> GHI + Tamb + parâmetros elétricos.</div>',
                 unsafe_allow_html=True,
             )
 
-    st.write("")
-    with st.container(border=True):
-        panel_title("Fluxo de funcionamento · Execução paralela")
-        st.markdown(
-            """
-            <div class="flow-shell">
-              <div class="flow-node">
-                <small>ENTRADA COMUM · 120 MINUTOS OU 24 HORAS</small>
-                <b>timestamp · GHI · Tamb opcional · datasheet · arranjo 2S × 3P</b>
-              </div>
-              <div class="flow-arrow">↓</div>
-              <div class="flow-parallel">
-                <div class="flow-model flow-blue">
-                  <b>Modelo 1 · Irradiância</b>
-                  <span>estimativa de continuidade</span>
-                </div>
-                <div class="flow-model flow-green">
-                  <b>Modelo 2 · NOCT</b>
-                  <span>estimativa térmica</span>
-                </div>
-                <div class="flow-model flow-orange">
-                  <b>Modelo 3 · SDM</b>
-                  <span>estimativa físico-elétrica</span>
-                </div>
-              </div>
-              <div class="flow-arrow">↓</div>
-              <div class="flow-outputs">
-                <div class="flow-node">
-                  <small>CONSISTÊNCIA</small>
-                  <b>Sobreposição, divergência e comparação dos resultados</b>
-                </div>
-                <div class="flow-node">
-                  <small>CONTINUIDADE</small>
-                  <b>Operação degradada com o Modelo 1 quando Tamb é perdida</b>
-                </div>
-              </div>
-              <div class="flow-arrow">↓</div>
-              <div class="flow-node">
-                <small>SAÍDA</small>
-                <b>Modelo selecionado + colunas escolhidas para exportação</b>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        """
+        <div class="overview-section-head">
+          <small>Fluxo operacional</small>
+          <b>Uma entrada comum, quatro etapas</b>
+        </div>
+        <div class="process-band">
+          <div class="process-step process-input">
+            <small>01 · ENTRADA</small>
+            <b>Janela meteorológica comum</b>
+            <span>timestamp · GHI · Tamb · datasheet</span>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step process-models">
+            <small>02 · EXECUÇÃO</small>
+            <b>Três modelos em paralelo</b>
+            <span>irradiância · NOCT · SDM</span>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step process-decision">
+            <small>03 · DECISÃO</small>
+            <b>Comparação ou continuidade</b>
+            <span>consistência · diagnóstico · fallback</span>
+          </div>
+          <div class="process-arrow">→</div>
+          <div class="process-step process-output">
+            <small>04 · SAÍDA</small>
+            <b>Resultado rastreável</b>
+            <span>modelo e colunas escolhidos no CSV</span>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.write("")
-    reliability, availability = st.columns([1.05, .95], gap="medium")
+    st.markdown(
+        """
+        <div class="overview-section-head">
+          <small>Confiabilidade operacional</small>
+          <b>Por que manter três modelos?</b>
+          <span>A redundância serve para comparar — e também para continuar produzindo uma referência útil.</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    reliability, availability = st.columns([1.08, .92], gap="medium")
     with reliability:
-        with st.container(border=True):
-            panel_title("Confiabilidade · Por que manter três modelos?")
+        with st.container(border=True, height="stretch"):
+            panel_title("Benefícios do motor multimodelo")
             st.markdown(
                 """
-                <ul class="reliability-list">
-                  <li><b>Degradação controlada:</b> se a temperatura deixa de chegar, o modelo simples continua entregando uma referência de potência.</li>
-                  <li><b>Redundância analítica:</b> três formulações independentes ajudam a identificar resultados anômalos ou divergências inesperadas.</li>
-                  <li><b>Rastreabilidade:</b> a plataforma informa quais modelos executaram; não inventa uma temperatura para esconder a falha da entrada.</li>
-                  <li><b>Validação progressiva:</b> o modelo simples funciona como linha de base, o intermediário isola o efeito térmico e o SDM representa a física elétrica completa.</li>
-                  <li><b>Continuidade do EMS:</b> o otimizador pode receber ao menos uma orientação de geração mesmo quando a medição de Tamb está indisponível.</li>
-                </ul>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                """
-                <div class="overview-note">
-                  <b>Importante:</b> os três modelos compartilham a irradiância. Portanto, a arquitetura
-                  aumenta a disponibilidade diante da perda de temperatura e permite verificação cruzada,
-                  mas não elimina uma falha da própria GHI. Isso exigiria redundância também na aquisição ou previsão meteorológica.
+                <div class="reliability-compact">
+                  <div class="reliability-item">
+                    <div class="reliability-index">01</div>
+                    <div><b>Continuidade controlada</b><p>Sem temperatura, o modelo simples ainda entrega uma referência de potência.</p></div>
+                  </div>
+                  <div class="reliability-item">
+                    <div class="reliability-index">02</div>
+                    <div><b>Verificação cruzada</b><p>Divergências entre formulações ajudam a revelar resultados anômalos.</p></div>
+                  </div>
+                  <div class="reliability-item">
+                    <div class="reliability-index">03</div>
+                    <div><b>Rastreabilidade</b><p>O motor informa o que executou e não mascara a falta de uma entrada.</p></div>
+                  </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
     with availability:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
             panel_title("Disponibilidade · Resposta do motor")
             st.markdown(
                 """
@@ -622,19 +657,35 @@ def render_overview_page() -> None:
                 """,
                 unsafe_allow_html=True,
             )
-            st.write("")
+
+    with st.expander("Entenda os limites e a lógica completa de confiabilidade"):
+        detail_left, detail_right = st.columns(2, gap="large")
+        with detail_left:
             st.markdown(
                 """
-                <div class="formula-box">
-                  <b>Confiabilidade aqui significa disponibilidade + diagnóstico.</b><br>
-                  A comparação não é o único objetivo: ela também permite detectar quando uma
-                  estimativa se afasta das outras e manter uma saída útil em condição degradada.
+                <div class="overview-detail-note">
+                  <b>Validação progressiva.</b> O modelo simples funciona como linha de base;
+                  o intermediário isola o efeito térmico; e o SDM representa a física elétrica completa.<br><br>
+                  <b>Continuidade do EMS.</b> Mesmo sem Tamb, o sistema pode fornecer ao otimizador
+                  uma orientação de geração explicitamente marcada como estimativa degradada.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with detail_right:
+            st.markdown(
+                """
+                <div class="overview-detail-note">
+                  <b>Limite comum.</b> Os três modelos dependem da irradiância. A arquitetura aumenta
+                  a disponibilidade diante da perda de temperatura, mas não elimina uma falha da própria GHI.
+                  Para isso, seria necessária redundância também na medição ou previsão meteorológica.<br><br>
+                  <b>Definição prática.</b> Aqui, confiabilidade significa disponibilidade + diagnóstico,
+                  e não apenas três curvas para comparação visual.
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-    st.write("")
     if st.button(
         "→ IR PARA ENTRADA E CONFIGURAR UMA JANELA",
         type="primary",
