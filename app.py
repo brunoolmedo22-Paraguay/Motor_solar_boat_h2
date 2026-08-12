@@ -142,6 +142,33 @@ APP_CSS = """
   .config-fact small { display:block; color:#788896; font-size:.57rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
   .config-fact b { display:block; color:#20313F; font-size:.72rem; margin-top:.12rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
+  .input-title-eyebrow {
+    color:#00699A; font-size:.64rem; font-weight:880; letter-spacing:.13em;
+    text-transform:uppercase; margin-bottom:.42rem;
+  }
+  .input-title-main {
+    color:#111A22; font-size:1.48rem; line-height:1.04; font-weight:920;
+    letter-spacing:-.035em;
+  }
+  .input-title-subtitle {
+    color:#6B7C8B; font-size:.72rem; line-height:1.45; margin-top:.5rem;
+  }
+  .st-key-input_run_panel .stButton > button {
+    min-height:12rem; border-radius:18px; font-size:1rem; letter-spacing:.015em;
+  }
+  .st-key-input_run_panel .stButton > button p { font-weight:880; }
+  .st-key-input_system_panel .datasheet-grid {
+    grid-template-columns:repeat(6,minmax(0,1fr)); gap:.42rem;
+  }
+  .st-key-input_system_panel .datasheet-item { padding:.52rem .56rem; }
+  .st-key-input_system_panel .status-row { margin:.34rem 0 .4rem; }
+  .input-common-note {
+    border-left:3px solid #1380AC; border-radius:0 8px 8px 0;
+    background:#F2F8FC; color:#426174; font-size:.73rem; line-height:1.48;
+    padding:.56rem .7rem; margin:.1rem 0 .3rem;
+  }
+  .input-common-note b { color:#21485E; }
+
   .overview-hero-copy {
     color:#40515F; font-size:.95rem; line-height:1.68; margin:.8rem 0 .78rem;
     max-width:760px;
@@ -281,6 +308,8 @@ APP_CSS = """
 
   @media (max-width: 900px) {
     .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .st-key-input_system_panel .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .st-key-input_run_panel .stButton > button { min-height:4.25rem; border-radius:10px; }
     .process-band { grid-template-columns:1fr; }
     .process-arrow { transform:rotate(90deg); justify-self:center; }
     .availability-row { grid-template-columns:1fr; }
@@ -697,18 +726,74 @@ def render_overview_page() -> None:
 
 
 def render_input_page() -> None:
-    page_header(
-        "Entrada · Configuração comum",
-        "ENTRADA DOS MODELOS",
-        "Selecione o módulo, carregue um CSV ou gere uma janela sintética e execute os três modelos.",
-    )
+    title_column, left = st.columns([0.42, 1.58], gap="medium")
+    with title_column:
+        with st.container(border=True, key="input_title_panel"):
+            st.markdown(
+                """
+                <div class="input-title-eyebrow">Entrada · Configuração comum</div>
+                <div class="input-title-main">ENTRADA<br>DOS MODELOS</div>
+                <div class="input-title-subtitle">Prepare a janela e execute o motor multimodelo.</div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with st.container(key="input_run_panel"):
+            run_requested = st.button(
+                "▶ RODAR MODELOS",
+                type="primary",
+                width="stretch",
+                key="run_models_button",
+            )
 
-    run_requested = st.button(
-        "▶ RODAR MODELOS",
-        type="primary",
-        width="stretch",
-        key="run_models_button",
-    )
+    preview_profile = None
+    source_description = "—"
+
+    with left:
+        with st.container(border=True, key="input_system_panel"):
+            panel_title("Sistema fotovoltaico · Datasheet")
+            module_keys = list(MODULE_DB.keys())
+            default_module = "CS7L-580MS"
+            module_key = st.selectbox(
+                "Módulo fotovoltaico",
+                module_keys,
+                index=_default_index(module_keys, default_module),
+                help="Os três modelos recebem os parâmetros do mesmo datasheet.",
+            )
+            module_preview = get_module(module_key)
+
+            a1, a2, a3 = st.columns([0.8, 0.8, 1.4])
+            with a1:
+                n_series = st.number_input(
+                    "Módulos em série", min_value=1, max_value=30, value=2, step=1
+                )
+            with a2:
+                n_parallel = st.number_input(
+                    "Strings em paralelo", min_value=1, max_value=30, value=3, step=1
+                )
+            with a3:
+                losses_pct = st.slider(
+                    "Perdas ópticas / sujeira [%]", 0.0, 20.0, 0.0, 0.5
+                )
+            model_datasheet(module_preview)
+            installed_kwp = module_preview.stc.p_nom * int(n_series) * int(n_parallel) / 1000.0
+            st.markdown(
+                '<div class="status-row">'
+                + status_chip(f"{int(n_series)}S × {int(n_parallel)}P", "info")
+                + status_chip(f"{int(n_series)*int(n_parallel)} módulos", "info")
+                + status_chip(f"{installed_kwp:.3f} kWp", "ok")
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                """
+                <div class="input-common-note">
+                  <b>Hipótese comum.</b> A coluna selecionada como GHI alimenta os três modelos.
+                  Arranjo, perdas e datasheet permanecem idênticos para tornar a comparação consistente.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
     run_feedback = st.empty()
     if run_requested:
         st.session_state["last_run_notice"] = None
@@ -721,64 +806,9 @@ def render_input_page() -> None:
         st.session_state["last_run_notice"] = {"kind": kind, "message": message}
         getattr(run_feedback, kind)(message)
 
-    st.caption(
-        "Configure o módulo e a fonte de dados abaixo. O botão executa a janela atualmente preparada."
-    )
-
-    left, right = st.columns([0.82, 1.48], gap="medium")
-    preview_profile = None
-    source_description = "—"
-
-    with left:
-        with st.container(border=True):
-            panel_title("Sistema fotovoltaico · Datasheet")
-            module_keys = list(MODULE_DB.keys())
-            default_module = "CS7L-580MS"
-            module_key = st.selectbox(
-                "Módulo fotovoltaico",
-                module_keys,
-                index=_default_index(module_keys, default_module),
-                help="Os três modelos recebem os parâmetros do mesmo datasheet.",
-            )
-            module_preview = get_module(module_key)
-
-            a1, a2 = st.columns(2)
-            with a1:
-                n_series = st.number_input(
-                    "Módulos em série", min_value=1, max_value=30, value=2, step=1
-                )
-            with a2:
-                n_parallel = st.number_input(
-                    "Strings em paralelo", min_value=1, max_value=30, value=3, step=1
-                )
-            losses_pct = st.slider(
-                "Perdas ópticas / sujeira [%]", 0.0, 20.0, 0.0, 0.5
-            )
-            model_datasheet(module_preview)
-            installed_kwp = module_preview.stc.p_nom * int(n_series) * int(n_parallel) / 1000.0
-            st.markdown(
-                '<div class="status-row">'
-                + status_chip(f"{int(n_series)}S × {int(n_parallel)}P", "info")
-                + status_chip(f"{int(n_series)*int(n_parallel)} módulos", "info")
-                + status_chip(f"{installed_kwp:.3f} kWp", "ok")
-                + "</div>",
-                unsafe_allow_html=True,
-            )
-
-        with st.container(border=True):
-            panel_title("Hipótese comum")
-            st.markdown(
-                """
-                <div class="formula-box">
-                  A coluna selecionada como GHI é usada pelos três modelos como irradiância incidente no plano do módulo.
-                  O arranjo, as perdas e o datasheet são idênticos para tornar a comparação consistente.
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
+    right = st.container()
     with right:
-        with st.container(border=True):
+        with st.container(border=True, key="input_source_panel"):
             panel_title("Fonte dos dados · Janela temporal")
             source = st.radio(
                 "Fonte",
