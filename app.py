@@ -83,18 +83,6 @@ APP_CSS = """
   [data-testid="stSidebar"] h2,
   [data-testid="stSidebar"] h3 { color: #EAF1F6 !important; }
   [data-testid="stSidebar"] hr { border-color: rgba(255,255,255,.14); }
-  [data-testid="stSidebar"] [role="radiogroup"] { gap: .52rem; }
-  [data-testid="stSidebar"] [role="radiogroup"] label {
-    background: rgba(255,255,255,.065);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 9px;
-    padding: .62rem .75rem;
-    transition: all .15s ease;
-  }
-  [data-testid="stSidebar"] [role="radiogroup"] label:hover {
-    background: rgba(255,255,255,.11);
-    border-color: rgba(255,255,255,.24);
-  }
 
   .solar-brand { text-align: center; padding: 1.2rem .3rem 1.45rem; }
   .solar-mark {
@@ -140,6 +128,62 @@ APP_CSS = """
   .model-status-card p { color:#718096; font-size:.7rem; margin:.22rem 0 0; }
   .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.35rem; }
 
+  .overview-lead { color:#3E4C59; font-size:.93rem; line-height:1.72; margin:.15rem 0 .8rem; }
+  .overview-lead b { color:#17222D; }
+  .overview-note {
+    border:1px solid #CFE3EF; background:#F1F8FC; border-radius:9px;
+    padding:.72rem .82rem; color:#31536A; font-size:.78rem; line-height:1.55;
+  }
+  [data-testid="stImage"] img { border-radius:9px; border:1px solid #DCE5EC; }
+  .explain-tag {
+    display:inline-flex; align-items:center; border-radius:999px; padding:.26rem .55rem;
+    font-size:.62rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase;
+    margin-bottom:.35rem;
+  }
+  .tag-blue { color:#1766A3; background:#E9F3FC; border:1px solid #C6DFF3; }
+  .tag-green { color:#087A55; background:#E8F7F1; border:1px solid #BCE9D8; }
+  .tag-orange { color:#A55C00; background:#FFF3E2; border:1px solid #F2D3A5; }
+  .model-explainer-title { color:#17222D; font-weight:900; font-size:1.02rem; margin:.1rem 0 .4rem; }
+  .model-explainer-text { color:#5F6F7E; font-size:.78rem; line-height:1.55; min-height:74px; }
+  .needs-line { color:#748391; font-size:.68rem; margin-top:.55rem; }
+  .needs-line b { color:#3A4C5C; }
+
+  .flow-shell {
+    border:1px solid #DCE3E9; border-radius:10px; background:#FAFCFD;
+    padding:1rem; text-align:center;
+  }
+  .flow-node {
+    border:1px solid #C7D9E5; border-radius:9px; background:#FFFFFF;
+    padding:.68rem .75rem; color:#17222D;
+  }
+  .flow-node small { display:block; color:#08729E; font-size:.61rem; font-weight:850; letter-spacing:.11em; margin-bottom:.2rem; }
+  .flow-node b { display:block; font-size:.8rem; }
+  .flow-arrow { color:#3B7A9D; font-size:1.35rem; line-height:1; padding:.3rem 0; font-weight:900; }
+  .flow-parallel { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+  .flow-model { border-radius:9px; padding:.72rem .58rem; background:#FFFFFF; }
+  .flow-model b { display:block; color:#17222D; font-size:.76rem; }
+  .flow-model span { display:block; color:#70808E; font-size:.65rem; margin-top:.18rem; }
+  .flow-blue { border:1px solid #BFD9F0; border-top:3px solid #2F80ED; }
+  .flow-green { border:1px solid #BDE5D7; border-top:3px solid #16A085; }
+  .flow-orange { border:1px solid #F2D2A9; border-top:3px solid #F2994A; }
+  .flow-outputs { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+
+  .reliability-list { margin:.15rem 0 0; padding-left:1.05rem; color:#536575; font-size:.8rem; line-height:1.65; }
+  .reliability-list li { margin-bottom:.32rem; }
+  .reliability-list b { color:#243746; }
+  .availability-grid { display:grid; gap:.55rem; }
+  .availability-row {
+    display:grid; grid-template-columns:1.05fr .95fr; gap:.7rem; align-items:center;
+    border:1px solid #DEE5EA; border-radius:8px; padding:.65rem .7rem; background:#FBFCFD;
+  }
+  .availability-row small { display:block; color:#7A8996; font-size:.6rem; font-weight:850; letter-spacing:.09em; }
+  .availability-row b { color:#223542; font-size:.76rem; }
+  .availability-result { text-align:right; font-size:.72rem; font-weight:850; }
+  .result-ok { color:#087A55; }
+  .result-warn { color:#A66A00; }
+  .result-stop { color:#B33A3A; }
+  div[data-testid="stLaTeX"] { font-size:.87rem; }
+
   div[data-testid="stVerticalBlockBorderWrapper"] {
     border-color: var(--solar-border) !important; border-radius:10px !important; box-shadow:none !important;
   }
@@ -157,6 +201,23 @@ APP_CSS = """
   .stButton > button[kind="primary"], .stDownloadButton > button[kind="primary"] {
     background:linear-gradient(135deg,#0878A8,#00577F); border-color:#00577F;
   }
+  [data-testid="stSidebar"] .stButton { margin-bottom:.38rem; }
+  [data-testid="stSidebar"] .stButton > button {
+    width:100%; min-height:2.55rem; border-radius:9px;
+    background:rgba(255,255,255,.065); border:1px solid rgba(255,255,255,.12);
+    color:#EAF1F6; font-size:.79rem; font-weight:760; box-shadow:none;
+    transition:background .16s ease,border-color .16s ease,transform .16s ease;
+  }
+  [data-testid="stSidebar"] .stButton > button:hover {
+    background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.25);
+    color:#FFFFFF; transform:translateY(-1px);
+  }
+  [data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background:linear-gradient(135deg,#1D496D 0%,#123B5F 100%);
+    border:1px solid #5D86A6; color:#FFFFFF;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  [data-testid="stSidebar"] .stButton > button p { color:inherit !important; font-weight:inherit; }
   .stTabs [data-baseweb="tab-list"] { gap:.45rem; border-bottom:1px solid #DDE3E9; }
   .stTabs [data-baseweb="tab"] { padding:.62rem .9rem; font-weight:750; }
   [data-baseweb="select"] > div, [data-baseweb="input"] > div { border-radius:8px; }
@@ -164,6 +225,9 @@ APP_CSS = """
 
   @media (max-width: 900px) {
     .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .flow-parallel, .flow-outputs { grid-template-columns:1fr; }
+    .availability-row { grid-template-columns:1fr; }
+    .availability-result { text-align:left; }
     .block-container { padding-left:1rem; padding-right:1rem; }
   }
 </style>
@@ -178,11 +242,19 @@ CHART_CONFIG = {
     "toImageButtonOptions": {"format": "svg", "filename": "solar_multimodel"},
 }
 
-NAV_INPUT = "1 · ENTRADA"
-NAV_MODELS = "2 · MODELOS"
-NAV_COMPARISON = "3 · COMPARAÇÃO"
-NAV_EXPORT = "4 · EXPORTAÇÃO"
-NAV_OPTIONS = (NAV_INPUT, NAV_MODELS, NAV_COMPARISON, NAV_EXPORT)
+NAV_OVERVIEW = "Visão geral"
+NAV_INPUT = "Entrada"
+NAV_MODELS = "Modelos"
+NAV_COMPARISON = "Comparação"
+NAV_EXPORT = "Exportação"
+NAV_OPTIONS = (NAV_OVERVIEW, NAV_INPUT, NAV_MODELS, NAV_COMPARISON, NAV_EXPORT)
+NAV_KEYS = {
+    NAV_OVERVIEW: "overview",
+    NAV_INPUT: "input",
+    NAV_MODELS: "models",
+    NAV_COMPARISON: "comparison",
+    NAV_EXPORT: "export",
+}
 
 
 def init_state() -> None:
@@ -194,6 +266,7 @@ def init_state() -> None:
         "kpis_by_model": {},
         "run_config": {},
         "extraction_report": None,
+        "current_page": NAV_OVERVIEW,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -260,12 +333,17 @@ def sidebar() -> str:
             unsafe_allow_html=True,
         )
         st.markdown('<div class="sidebar-label">NAVEGAÇÃO</div>', unsafe_allow_html=True)
-        nav = st.radio(
-            "Navegação",
-            options=NAV_OPTIONS,
-            key="main_navigation",
-            label_visibility="collapsed",
-        )
+        nav = st.session_state["current_page"]
+        for option in NAV_OPTIONS:
+            clicked = st.button(
+                option,
+                key=f"nav_{NAV_KEYS[option]}",
+                type="primary" if option == nav else "secondary",
+                width="stretch",
+            )
+            if clicked and option != nav:
+                st.session_state["current_page"] = option
+                st.rerun()
 
         st.divider()
         st.markdown('<div class="sidebar-label">ESTADO DA EXECUÇÃO</div>', unsafe_allow_html=True)
@@ -295,7 +373,7 @@ def sidebar() -> str:
 
         st.divider()
         st.caption("Janela operacional fixa: 120 amostras · passo de 1 minuto.")
-        return nav
+        return st.session_state["current_page"]
 
 
 def _default_index(options: list, value) -> int:
@@ -305,11 +383,238 @@ def _default_index(options: list, value) -> int:
         return 0
 
 
+def render_overview_page() -> None:
+    page_header(
+        "Visão geral · Fundamentos e arquitetura",
+        "DO SOL À POTÊNCIA ELÉTRICA",
+        "Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.",
+    )
+
+    intro, visual = st.columns([0.83, 1.37], gap="medium")
+    with intro:
+        with st.container(border=True):
+            panel_title("Conceito · O que é um modelo solar?")
+            st.markdown(
+                """
+                <div class="overview-lead">
+                  Um <b>modelo solar fotovoltaico</b> é uma representação matemática que transforma
+                  condições ambientais e informações do painel em uma estimativa da potência elétrica disponível.
+                  Ele conecta o que chega do ambiente — principalmente <b>irradiância</b> e
+                  <b>temperatura</b> — ao comportamento do módulo selecionado no datasheet.
+                </div>
+                <div class="overview-note">
+                  Nesta plataforma, todos os modelos recebem a mesma janela de <b>120 minutos</b>,
+                  o mesmo arranjo e o mesmo módulo. Assim, qualquer diferença observada vem da
+                  formulação matemática, e não de entradas diferentes.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                '<div class="status-row">'
+                + status_chip("Entrada comum", "info")
+                + status_chip("3 modelos em paralelo", "ok")
+                + status_chip("Saída rastreável", "info")
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+
+    with visual:
+        with st.container(border=True):
+            panel_title("Conversão fotovoltaica · Irradiância → eletricidade")
+            st.image(
+                "assets/fluxo_fotovoltaico.jpg",
+                caption="A irradiância incidente é convertida pelo módulo fotovoltaico em potência elétrica.",
+                width="stretch",
+            )
+
+    st.write("")
+    panel_title("Três modelos · Mesma entrada, três níveis de complexidade")
+    model_1, model_2, model_3 = st.columns(3, gap="medium")
+
+    with model_1:
+        with st.container(border=True):
+            st.markdown('<span class="explain-tag tag-blue">Modelo 1 · Continuidade</span>', unsafe_allow_html=True)
+            st.markdown('<div class="model-explainer-title">Irradiância</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="model-explainer-text">Escala diretamente a potência de pico do datasheet '
+                "pela irradiância efetiva. É rápido, transparente e não depende de temperatura.</div>",
+                unsafe_allow_html=True,
+            )
+            st.latex(r"P_1(t)=N\,P_{STC}\,\frac{G_{ef}(t)}{G_{STC}}")
+            st.markdown(
+                '<div class="needs-line"><b>Precisa:</b> timestamp + GHI + potência STC.</div>',
+                unsafe_allow_html=True,
+            )
+
+    with model_2:
+        with st.container(border=True):
+            st.markdown('<span class="explain-tag tag-green">Modelo 2 · Térmico</span>', unsafe_allow_html=True)
+            st.markdown('<div class="model-explainer-title">NOCT + eficiência</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="model-explainer-text">Calcula a temperatura da célula com o NOCT e '
+                "corrige a eficiência pelo coeficiente térmico de potência publicado no datasheet.</div>",
+                unsafe_allow_html=True,
+            )
+            st.latex(r"T_c=T_{amb}+\frac{NOCT-20}{800}G_{ef}")
+            st.latex(r"P_2=N\,\eta_{STC}[1+\gamma_P(T_c-25)]\,G_{ef}A")
+            st.markdown(
+                '<div class="needs-line"><b>Precisa:</b> GHI + Tamb + NOCT + área + γPmax.</div>',
+                unsafe_allow_html=True,
+            )
+
+    with model_3:
+        with st.container(border=True):
+            st.markdown('<span class="explain-tag tag-orange">Modelo 3 · Físico</span>', unsafe_allow_html=True)
+            st.markdown('<div class="model-explainer-title">Single Diode Model</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="model-explainer-text">Representa eletricamente o módulo, translada os '
+                "cinco parâmetros para cada condição e resolve numericamente o ponto de máxima potência.</div>",
+                unsafe_allow_html=True,
+            )
+            st.latex(
+                r"I=I_L-I_0\!\left[e^{\frac{V+IR_s}{a}}-1\right]-\frac{V+IR_s}{R_{sh}}"
+            )
+            st.latex(r"P_3(t)=N\,\max_V\{V\,I(V)\}")
+            st.markdown(
+                '<div class="needs-line"><b>Precisa:</b> GHI + Tamb + parâmetros elétricos do módulo.</div>',
+                unsafe_allow_html=True,
+            )
+
+    st.write("")
+    with st.container(border=True):
+        panel_title("Fluxo de funcionamento · Execução paralela")
+        st.markdown(
+            """
+            <div class="flow-shell">
+              <div class="flow-node">
+                <small>ENTRADA COMUM · 120 MINUTOS</small>
+                <b>timestamp · GHI · Tamb opcional · datasheet · arranjo 2S × 3P</b>
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-parallel">
+                <div class="flow-model flow-blue">
+                  <b>Modelo 1 · Irradiância</b>
+                  <span>estimativa de continuidade</span>
+                </div>
+                <div class="flow-model flow-green">
+                  <b>Modelo 2 · NOCT</b>
+                  <span>estimativa térmica</span>
+                </div>
+                <div class="flow-model flow-orange">
+                  <b>Modelo 3 · SDM</b>
+                  <span>estimativa físico-elétrica</span>
+                </div>
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-outputs">
+                <div class="flow-node">
+                  <small>CONSISTÊNCIA</small>
+                  <b>Sobreposição, divergência e comparação dos resultados</b>
+                </div>
+                <div class="flow-node">
+                  <small>CONTINUIDADE</small>
+                  <b>Operação degradada com o Modelo 1 quando Tamb é perdida</b>
+                </div>
+              </div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-node">
+                <small>SAÍDA</small>
+                <b>Modelo selecionado + colunas escolhidas para exportação</b>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.write("")
+    reliability, availability = st.columns([1.05, .95], gap="medium")
+    with reliability:
+        with st.container(border=True):
+            panel_title("Confiabilidade · Por que manter três modelos?")
+            st.markdown(
+                """
+                <ul class="reliability-list">
+                  <li><b>Degradação controlada:</b> se a temperatura deixa de chegar, o modelo simples continua entregando uma referência de potência.</li>
+                  <li><b>Redundância analítica:</b> três formulações independentes ajudam a identificar resultados anômalos ou divergências inesperadas.</li>
+                  <li><b>Rastreabilidade:</b> a plataforma informa quais modelos executaram; não inventa uma temperatura para esconder a falha da entrada.</li>
+                  <li><b>Validação progressiva:</b> o modelo simples funciona como linha de base, o intermediário isola o efeito térmico e o SDM representa a física elétrica completa.</li>
+                  <li><b>Continuidade do EMS:</b> o otimizador pode receber ao menos uma orientação de geração mesmo quando a medição de Tamb está indisponível.</li>
+                </ul>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                """
+                <div class="overview-note">
+                  <b>Importante:</b> os três modelos compartilham a irradiância. Portanto, a arquitetura
+                  aumenta a disponibilidade diante da perda de temperatura e permite verificação cruzada,
+                  mas não elimina uma falha da própria GHI. Isso exigiria redundância também na aquisição ou previsão meteorológica.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with availability:
+        with st.container(border=True):
+            panel_title("Disponibilidade · Resposta do motor")
+            st.markdown(
+                """
+                <div class="availability-grid">
+                  <div class="availability-row">
+                    <div><small>ENTRADA COMPLETA</small><b>GHI + Tamb válidas</b></div>
+                    <div class="availability-result result-ok">3 modelos executados</div>
+                  </div>
+                  <div class="availability-row">
+                    <div><small>MODO DEGRADADO</small><b>GHI válida · Tamb ausente</b></div>
+                    <div class="availability-result result-warn">Modelo 1 continua</div>
+                  </div>
+                  <div class="availability-row">
+                    <div><small>ENTRADA CRÍTICA</small><b>GHI ausente ou janela irregular</b></div>
+                    <div class="availability-result result-stop">Execução bloqueada</div>
+                  </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.write("")
+            st.markdown(
+                """
+                <div class="formula-box">
+                  <b>Confiabilidade aqui significa disponibilidade + diagnóstico.</b><br>
+                  A comparação não é o único objetivo: ela também permite detectar quando uma
+                  estimativa se afasta das outras e manter uma saída útil em condição degradada.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.write("")
+    if st.button(
+        "→ IR PARA ENTRADA E CONFIGURAR UMA JANELA",
+        type="primary",
+        width="stretch",
+        key="overview_to_input",
+    ):
+        st.session_state["current_page"] = NAV_INPUT
+        st.rerun()
+
+
 def render_input_page() -> None:
     page_header(
         "Entrada · Configuração comum",
         "ENTRADA DOS MODELOS",
         "Selecione o módulo, carregue um CSV ou gere uma janela sintética e execute os três modelos.",
+    )
+
+    run_requested = st.button(
+        "▶ RODAR MODELOS",
+        type="primary",
+        width="stretch",
+        key="run_models_button",
+    )
+    st.caption(
+        "Configure o módulo e a fonte de dados abaixo. O botão executa a janela atualmente preparada."
     )
 
     left, right = st.columns([0.82, 1.48], gap="medium")
@@ -528,16 +833,9 @@ def render_input_page() -> None:
                         "Tamb não está completa. O modelo de irradiância continuará operando; "
                         "o modelo NOCT e o SDM serão marcados como indisponíveis."
                     )
-
-    st.write("")
-    run_disabled = preview_profile is None
-    if st.button(
-        "▶ RODAR MODELOS",
-        type="primary",
-        width="stretch",
-        disabled=run_disabled,
-        key="run_models_button",
-    ):
+    if run_requested and preview_profile is None:
+        st.warning("Prepare uma janela válida de 120 minutos antes de executar os modelos.")
+    elif run_requested:
         try:
             module = get_module(module_key)
             extraction_report = None
@@ -973,7 +1271,9 @@ def render_export_page() -> None:
 
 navigation = sidebar()
 
-if navigation == NAV_INPUT:
+if navigation == NAV_OVERVIEW:
+    render_overview_page()
+elif navigation == NAV_INPUT:
     render_input_page()
 elif navigation == NAV_MODELS:
     render_models_page()

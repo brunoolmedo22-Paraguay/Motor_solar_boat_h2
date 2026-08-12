@@ -54,15 +54,17 @@ Mais detalhes estão em [DOCUMENTACAO_MODELOS.md](DOCUMENTACAO_MODELOS.md).
 
 ## Interface
 
-A aplicação possui quatro seções:
+A aplicação possui cinco seções, acessadas por botões próprios no sidebar:
 
-1. **Entrada** — seleção do módulo e do arranjo, upload de CSV ou perfil
-   sintético, validação da janela e botão `RODAR MODELOS`.
-2. **Modelos** — três abas independentes com KPIs, potência, energia,
+1. **Visão geral** — explicação da conversão fotovoltaica, das equações dos
+   três modelos, do fluxo paralelo e da lógica de confiabilidade.
+2. **Entrada** — botão `RODAR MODELOS` no topo, seleção do módulo e do arranjo,
+   upload de CSV ou perfil sintético e validação da janela.
+3. **Modelos** — três abas independentes com KPIs, potência, energia,
    comportamento térmico, eficiência e curvas I-V/P-V do SDM.
-3. **Comparação** — sobreposição de potência, energia e eficiência, diferença
+4. **Comparação** — sobreposição de potência, energia e eficiência, diferença
    relativa ao SDM e tabela comparativa.
-4. **Exportação** — seleção do modelo, das colunas, do separador e do formato
+5. **Exportação** — seleção do modelo, das colunas, do separador e do formato
    decimal antes de baixar o CSV.
 
 ## Contrato da entrada
@@ -180,6 +182,8 @@ solarsdm-multimodel/
 ├── app.py
 ├── requirements.txt
 ├── DOCUMENTACAO_MODELOS.md
+├── assets/
+│   └── fluxo_fotovoltaico.jpg
 ├── Dados_exemplo/
 ├── config/
 │   ├── pv_database.py
