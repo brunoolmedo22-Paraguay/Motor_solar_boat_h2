@@ -438,7 +438,7 @@ def render_overview_page() -> None:
         "Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.",
     )
 
-    intro, visual = st.columns([1.22, 0.98], gap="medium")
+    intro, visual = st.columns([1.58, 0.62], gap="small")
     with intro:
         with st.container(border=True, height="stretch"):
             panel_title("Conceito · O que é um modelo solar?")
@@ -470,13 +470,10 @@ def render_overview_page() -> None:
     with visual:
         with st.container(border=True, height="stretch"):
             panel_title("Conversão fotovoltaica · Irradiância → eletricidade")
-            st.image(
-                "assets/fluxo_fotovoltaico.jpg",
-                caption="A irradiância incidente é convertida pelo módulo fotovoltaico em potência elétrica.",
-                width="stretch",
-            )
+            image_left, image_body, image_right = st.columns([0.06, 0.88, 0.06])
+            with image_body:
+                st.image("assets/fluxo_fotovoltaico.jpg", width="stretch")
 
-    st.write("")
     panel_title("Três modelos · Mesma entrada, três níveis de complexidade")
     model_1, model_2, model_3 = st.columns(3, gap="medium")
 
