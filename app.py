@@ -104,15 +104,15 @@ APP_CSS = """
 
   .page-head {
     border: 1px solid var(--solar-border); border-radius: 10px; background:#FFFFFF;
-    padding: 1rem 1.2rem; margin-bottom: .85rem;
+    padding: .72rem .95rem; margin-bottom: .62rem;
   }
   .eyebrow { color: var(--solar-blue); font-size:.68rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
-  .page-title { font-size:1.75rem; line-height:1.08; font-weight:900; color:#111A22; margin:.28rem 0 .2rem; }
+  .page-title { font-size:1.55rem; line-height:1.08; font-weight:900; color:#111A22; margin:.2rem 0 .12rem; }
   .page-subtitle { color:var(--solar-muted); font-size:.82rem; }
-  .panel-title { color:var(--solar-blue); font-size:.69rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.7rem; }
+  .panel-title { color:var(--solar-blue); font-size:.66rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.38rem; }
   .formula-box {
     background:#F7FAFC; border:1px solid #E1E7ED; border-left:3px solid var(--solar-blue);
-    border-radius:8px; padding:.7rem .85rem; color:#3E4C59; font-size:.8rem; margin:.3rem 0 .8rem;
+    border-radius:8px; padding:.5rem .72rem; color:#3E4C59; font-size:.74rem; margin:.16rem 0 .52rem;
   }
   .status-row { display:flex; gap:.45rem; flex-wrap:wrap; margin-top:.55rem; margin-bottom:.55rem; }
   .chip { display:inline-flex; align-items:center; border-radius:999px; padding:.28rem .56rem; font-size:.67rem; font-weight:800; }
@@ -123,10 +123,16 @@ APP_CSS = """
   .datasheet-item { border:1px solid #E1E6EB; border-radius:8px; padding:.58rem .65rem; background:#FBFCFD; }
   .datasheet-item small { display:block; color:#7B8894; font-size:.61rem; letter-spacing:.08em; font-weight:800; text-transform:uppercase; }
   .datasheet-item b { display:block; color:#17222D; font-size:.86rem; margin-top:.12rem; }
-  .model-status-card { border:1px solid #DDE3E9; border-radius:9px; padding:.68rem .76rem; background:#FFFFFF; min-height:78px; }
+  .model-status-card { border:1px solid #DDE3E9; border-radius:9px; padding:.52rem .65rem; background:#FFFFFF; min-height:64px; }
   .model-status-card b { color:#17222D; font-size:.8rem; }
   .model-status-card p { color:#718096; font-size:.7rem; margin:.22rem 0 0; }
   .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:.35rem; }
+  .compact-note {
+    min-height:236px; display:flex; flex-direction:column; justify-content:center;
+    border:1px dashed #C9D9E4; border-radius:8px; background:#F7FAFC;
+    padding:1rem 1.1rem; color:#536575; font-size:.78rem; line-height:1.55;
+  }
+  .compact-note b { color:#203746; font-size:.85rem; margin-bottom:.25rem; }
 
   .overview-lead { color:#3E4C59; font-size:.93rem; line-height:1.72; margin:.15rem 0 .8rem; }
   .overview-lead b { color:#17222D; }
@@ -186,15 +192,18 @@ APP_CSS = """
 
   div[data-testid="stVerticalBlockBorderWrapper"] {
     border-color: var(--solar-border) !important; border-radius:10px !important;
-    box-shadow:none !important; padding-bottom:.2rem;
+    box-shadow:none !important; padding-bottom:.12rem;
   }
+  div[data-testid="stVerticalBlock"] { gap:.72rem !important; }
   div[data-testid="stMetric"] {
     background:#FFFFFF; border:1px solid #DDE3E9; border-radius:9px;
-    padding:.65rem .75rem; min-height:94px;
+    padding:.48rem .62rem; min-height:76px;
   }
-  div[data-testid="stMetricLabel"] { color:#657484; font-size:.75rem; }
-  div[data-testid="stMetricValue"] { color:#111820; font-size:1.28rem; font-weight:850; }
-  div[data-testid="stMetricDelta"] { font-size:.68rem; }
+  div[data-testid="stMetricLabel"] { color:#657484; font-size:.69rem; }
+  div[data-testid="stMetricValue"] { color:#111820; font-size:1.12rem; font-weight:850; }
+  div[data-testid="stMetricDelta"] { font-size:.62rem; }
+  div[data-testid="stAlert"] { padding:.52rem .7rem; }
+  div[data-testid="stPlotlyChart"] { margin:0 !important; }
 
   .stButton > button, .stDownloadButton > button {
     border-radius:8px; font-weight:800; min-height:2.65rem; box-shadow:none;
@@ -220,7 +229,7 @@ APP_CSS = """
   }
   [data-testid="stSidebar"] .stButton > button p { color:inherit !important; font-weight:inherit; }
   .stTabs [data-baseweb="tab-list"] { gap:.45rem; border-bottom:1px solid #DDE3E9; }
-  .stTabs [data-baseweb="tab"] { padding:.62rem .9rem; font-weight:750; }
+  .stTabs [data-baseweb="tab"] { padding:.48rem .72rem; font-weight:750; }
   [data-baseweb="select"] > div, [data-baseweb="input"] > div { border-radius:8px; }
   [data-testid="stFileUploaderDropzone"] { border-radius:9px; background:#F8FAFC; }
 
@@ -1050,10 +1059,9 @@ def render_models_page() -> None:
             _formula_for(model_id)
             _metric_row(model_id, result, kpi)
 
-            st.write("")
-            c1, c2 = st.columns(2, gap="medium")
+            c1, c2 = st.columns([1.24, .76], gap="small")
             with c1:
-                with st.container(border=True):
+                with st.container(border=True, height="stretch"):
                     panel_title("Potência · Série temporal")
                     st.plotly_chart(
                         plot_model_power(result, model_id),
@@ -1062,7 +1070,7 @@ def render_models_page() -> None:
                         key=f"power_{model_id}",
                     )
             with c2:
-                with st.container(border=True):
+                with st.container(border=True, height="stretch"):
                     panel_title("Energia · Acumulada na janela")
                     st.plotly_chart(
                         plot_cumulative_energy(result, model_id),
@@ -1071,19 +1079,21 @@ def render_models_page() -> None:
                         key=f"energy_{model_id}",
                     )
 
-            d1, d2 = st.columns(2, gap="medium")
+            d1, d2 = st.columns(2, gap="small")
             with d1:
-                with st.container(border=True):
+                with st.container(border=True, height="stretch"):
                     panel_title("Comportamento térmico")
                     if model_id == MODEL_SIMPLE:
-                        st.info(
-                            "Este modelo não utiliza temperatura. Ele permanece operacional quando Tamb não está disponível."
-                        )
-                        st.plotly_chart(
-                            plot_input_profile(st.session_state["profile"]),
-                            width="stretch",
-                            config=CHART_CONFIG,
-                            key="simple_input_chart",
+                        st.markdown(
+                            """
+                            <div class="compact-note">
+                              <b>Operação independente de temperatura</b>
+                              Este modelo não calcula temperatura de célula. Por isso, continua
+                              entregando potência quando a coluna Tamb fica indisponível — sua função
+                              principal é garantir continuidade em modo degradado.
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
                         )
                     else:
                         st.plotly_chart(
@@ -1093,7 +1103,7 @@ def render_models_page() -> None:
                             key=f"temperature_{model_id}",
                         )
             with d2:
-                with st.container(border=True):
+                with st.container(border=True, height="stretch"):
                     panel_title("Eficiência · Evolução temporal")
                     st.plotly_chart(
                         plot_efficiency(result, model_id),
@@ -1105,14 +1115,17 @@ def render_models_page() -> None:
             if model_id == MODEL_SDM:
                 peak_ts = result["P_array"].idxmax()
                 peak = result.loc[peak_ts]
-                e1, e2, e3, e4 = st.columns(4)
-                e1.metric("Vmp do arranjo", f"{peak['Vmp_array']:.2f} V")
-                e2.metric("Imp do arranjo", f"{peak['Imp_array']:.3f} A")
-                e3.metric("Voc do arranjo", f"{peak['Voc_array']:.2f} V")
-                e4.metric("Fator de forma", f"{peak['FF']:.4f}")
-                if peak["G_eff"] > 0:
-                    with st.container(border=True):
-                        panel_title(f"SDM · Curvas I-V e P-V no pico ({peak_ts:%H:%M})")
+                with st.expander(
+                    f"Diagnóstico elétrico avançado do SDM · pico às {peak_ts:%H:%M}",
+                    expanded=False,
+                ):
+                    e1, e2, e3, e4 = st.columns(4)
+                    e1.metric("Vmp do arranjo", f"{peak['Vmp_array']:.2f} V")
+                    e2.metric("Imp do arranjo", f"{peak['Imp_array']:.3f} A")
+                    e3.metric("Voc do arranjo", f"{peak['Voc_array']:.2f} V")
+                    e4.metric("Fator de forma", f"{peak['FF']:.4f}")
+                    if peak["G_eff"] > 0:
+                        panel_title("Curvas I-V e P-V no ponto de maior potência")
                         st.plotly_chart(
                             plot_iv_pv_at_peak(module, result),
                             width="stretch",
@@ -1128,7 +1141,7 @@ def render_models_page() -> None:
                 cols = [col for col in preferred if col in result.columns]
                 display = result[cols].copy()
                 display.index = display.index.strftime("%Y-%m-%d %H:%M:%S")
-                st.dataframe(display, width="stretch", height=390)
+                st.dataframe(display, width="stretch", height=310)
 
 
 def _comparison_table(results_by_model: dict, kpis_by_model: dict) -> pd.DataFrame:
@@ -1194,25 +1207,24 @@ def render_comparison_page() -> None:
     energy_spread_pct = energy_spread / np.mean(energies) * 100.0 if np.mean(energies) else 0.0
     peak_spread = max(peaks) - min(peaks)
 
-    st.write("")
     q1, q2, q3, q4 = st.columns(4)
     q1.metric("Modelos comparados", f"{len(results)}")
     q2.metric("Dispersão de energia", f"{energy_spread:.4f} kWh", f"{energy_spread_pct:.2f} % da média")
     q3.metric("Dispersão de pico", f"{peak_spread:.1f} W")
     q4.metric("Janela", _window_label(profile), "1 minuto por passo")
 
-    with st.container(border=True):
-        panel_title("Potência · Sobreposição dos modelos")
-        st.plotly_chart(
-            plot_comparison_power(results),
-            width="stretch",
-            config=CHART_CONFIG,
-            key="comparison_power",
-        )
-
-    c1, c2 = st.columns(2, gap="medium")
+    c1, c2 = st.columns([1.24, .76], gap="small")
     with c1:
-        with st.container(border=True):
+        with st.container(border=True, height="stretch"):
+            panel_title("Potência · Sobreposição dos modelos")
+            st.plotly_chart(
+                plot_comparison_power(results),
+                width="stretch",
+                config=CHART_CONFIG,
+                key="comparison_power",
+            )
+    with c2:
+        with st.container(border=True, height="stretch"):
             panel_title("Energia · Acumulada")
             st.plotly_chart(
                 plot_comparison_energy(results),
@@ -1220,8 +1232,10 @@ def render_comparison_page() -> None:
                 config=CHART_CONFIG,
                 key="comparison_energy",
             )
-    with c2:
-        with st.container(border=True):
+    difference_fig = plot_difference_to_sdm(results)
+    d1, d2 = st.columns(2, gap="small")
+    with d1:
+        with st.container(border=True, height="stretch"):
             panel_title("Eficiência · Sobreposição")
             st.plotly_chart(
                 plot_comparison_efficiency(results),
@@ -1230,23 +1244,30 @@ def render_comparison_page() -> None:
                 key="comparison_efficiency",
             )
 
-    difference_fig = plot_difference_to_sdm(results)
-    if difference_fig is not None:
-        with st.container(border=True):
-            panel_title("Potência · Diferença relativa ao SDM")
-            st.plotly_chart(
-                difference_fig,
-                width="stretch",
-                config=CHART_CONFIG,
-                key="comparison_difference",
-            )
+    with d2:
+        with st.container(border=True, height="stretch"):
+            if difference_fig is not None:
+                panel_title("Potência · Diferença relativa ao SDM")
+                st.plotly_chart(
+                    difference_fig,
+                    width="stretch",
+                    config=CHART_CONFIG,
+                    key="comparison_difference",
+                )
+            else:
+                panel_title("Diferença relativa ao SDM")
+                st.markdown(
+                    '<div class="compact-note"><b>SDM indisponível</b>'
+                    "Execute o modelo físico para calcular a diferença relativa de potência.</div>",
+                    unsafe_allow_html=True,
+                )
 
-    with st.container(border=True):
-        panel_title("Síntese · Indicadores comparáveis")
+    with st.expander("Síntese numérica · Indicadores comparáveis", expanded=False):
         table = _comparison_table(results, kpis)
         st.dataframe(
             table,
             width="stretch",
+            height=160,
             hide_index=True,
             column_config={
                 "Energia [kWh]": st.column_config.NumberColumn(format="%.5f"),
@@ -1326,7 +1347,7 @@ def render_export_page() -> None:
             q2.metric("Colunas", f"{len(export_df.columns)}")
             q3.metric("Energia", f"{kpi['energy_kWh']:.4f} kWh")
             q4.metric("Pico", f"{kpi['p_max_W']:.1f} W")
-            st.dataframe(export_df, width="stretch", height=420, hide_index=True)
+            st.dataframe(export_df, width="stretch", height=340, hide_index=True)
 
             csv_bytes = export_df.to_csv(
                 index=False,

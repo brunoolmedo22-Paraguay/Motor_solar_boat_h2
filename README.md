@@ -62,9 +62,11 @@ A aplicação possui cinco seções, acessadas por botões próprios no sidebar:
    upload de CSV ou perfil sintético de 120 minutos/24 horas, curva solar
    perfeita sem ruído e validação da janela.
 3. **Modelos** — três abas independentes com KPIs, potência, energia,
-   comportamento térmico, eficiência e curvas I-V/P-V do SDM.
+   comportamento térmico e eficiência em uma grade compacta. As curvas I-V/P-V
+   e os indicadores elétricos do SDM ficam disponíveis sob demanda no painel
+   de diagnóstico avançado.
 4. **Comparação** — sobreposição de potência, energia e eficiência, diferença
-   relativa ao SDM e tabela comparativa.
+   relativa ao SDM em uma grade 2 × 2 e tabela comparativa expansível.
 5. **Exportação** — seleção do modelo, das colunas, do separador e do formato
    decimal antes de baixar o CSV.
 

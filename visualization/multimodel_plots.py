@@ -29,19 +29,19 @@ def _finish(
     *,
     ytitle: str = "",
     ytitle2: str | None = None,
-    height: int = 340,
+    height: int = 236,
     showlegend: bool = True,
 ) -> go.Figure:
     fig.update_layout(
         template="plotly_white",
         height=height,
-        margin=dict(l=58, r=30 if ytitle2 is None else 58, t=20, b=48),
+        margin=dict(l=50, r=20 if ytitle2 is None else 50, t=10, b=36),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#FFFFFF",
-        font=dict(family="Arial, sans-serif", color=TEXT, size=12),
+        font=dict(family="Arial, sans-serif", color=TEXT, size=11),
         hovermode="x unified",
         showlegend=showlegend,
-        legend=dict(orientation="h", yanchor="bottom", y=1.03, xanchor="left", x=0),
+        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
     )
     fig.update_xaxes(
         title="Horário",
@@ -87,7 +87,12 @@ def plot_input_profile(profile: pd.DataFrame) -> go.Figure:
             ),
             secondary_y=True,
         )
-    return _finish(fig, ytitle="Irradiância [W/m²]", ytitle2="Temperatura [°C]")
+    return _finish(
+        fig,
+        ytitle="Irradiância [W/m²]",
+        ytitle2="Temperatura [°C]",
+        height=270,
+    )
 
 
 def plot_model_power(results: pd.DataFrame, model_id: str) -> go.Figure:
@@ -182,7 +187,7 @@ def plot_comparison_power(results_by_model: dict[str, pd.DataFrame]) -> go.Figur
                 hovertemplate="%{y:.2f} W<extra>" + MODEL_LABELS[model_id] + "</extra>",
             )
         )
-    return _finish(fig, ytitle="Potência do arranjo [W]", height=390)
+    return _finish(fig, ytitle="Potência do arranjo [W]", height=236)
 
 
 def plot_comparison_energy(results_by_model: dict[str, pd.DataFrame]) -> go.Figure:
@@ -202,7 +207,7 @@ def plot_comparison_energy(results_by_model: dict[str, pd.DataFrame]) -> go.Figu
                 hovertemplate="%{y:.4f} kWh<extra>" + MODEL_LABELS[model_id] + "</extra>",
             )
         )
-    return _finish(fig, ytitle="Energia acumulada [kWh]", height=350)
+    return _finish(fig, ytitle="Energia acumulada [kWh]", height=236)
 
 
 def plot_comparison_efficiency(results_by_model: dict[str, pd.DataFrame]) -> go.Figure:
@@ -221,7 +226,7 @@ def plot_comparison_efficiency(results_by_model: dict[str, pd.DataFrame]) -> go.
                 hovertemplate="%{y:.3f} %<extra>" + MODEL_LABELS[model_id] + "</extra>",
             )
         )
-    return _finish(fig, ytitle="Eficiência [%]", height=350)
+    return _finish(fig, ytitle="Eficiência [%]", height=236)
 
 
 def plot_difference_to_sdm(results_by_model: dict[str, pd.DataFrame]) -> go.Figure | None:
@@ -255,7 +260,7 @@ def plot_difference_to_sdm(results_by_model: dict[str, pd.DataFrame]) -> go.Figu
     if not has_line:
         return None
     fig.add_hline(y=0, line_color="#8B98A5", line_dash="dash", line_width=1)
-    return _finish(fig, ytitle="Diferença de potência vs SDM [%]", height=350)
+    return _finish(fig, ytitle="Diferença de potência vs SDM [%]", height=236)
 
 
 def plot_iv_pv_at_peak(module, results: pd.DataFrame) -> go.Figure:
@@ -300,12 +305,12 @@ def plot_iv_pv_at_peak(module, results: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         template="plotly_white",
-        height=380,
-        margin=dict(l=58, r=58, t=28, b=52),
+        height=280,
+        margin=dict(l=52, r=52, t=16, b=42),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#FFFFFF",
-        font=dict(family="Arial, sans-serif", color=TEXT, size=12),
-        legend=dict(orientation="h", yanchor="bottom", y=1.03, x=0),
+        font=dict(family="Arial, sans-serif", color=TEXT, size=11),
+        legend=dict(orientation="h", yanchor="bottom", y=1.01, x=0),
     )
     fig.update_xaxes(title="Tensão do módulo [V]", gridcolor=GRID)
     fig.update_yaxes(title="Corrente [A]", gridcolor=GRID, secondary_y=False)
