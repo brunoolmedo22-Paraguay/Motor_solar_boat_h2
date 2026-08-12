@@ -9,7 +9,13 @@ from plotly.subplots import make_subplots
 
 from models.single_diode import iv_curve
 from simulation.mpp import find_mpp
-from simulation.multimodel import MODEL_COLORS, MODEL_LABELS, MODEL_ORDER, MODEL_SDM
+from simulation.multimodel import (
+    MODEL_COLORS,
+    MODEL_LABELS,
+    MODEL_ORDER,
+    MODEL_SDM,
+    MODEL_SHORT_LABELS,
+)
 from simulation.solver import translate_params
 
 
@@ -181,7 +187,11 @@ def plot_efficiency(results: pd.DataFrame, model_id: str) -> go.Figure:
     return _finish(fig, ytitle="Eficiência [%]", showlegend=False)
 
 
-def plot_comparison_power(results_by_model: dict[str, pd.DataFrame]) -> go.Figure:
+def plot_comparison_power(
+    results_by_model: dict[str, pd.DataFrame],
+    *,
+    height: int = 236,
+) -> go.Figure:
     fig = go.Figure()
     for model_id in MODEL_ORDER:
         if model_id not in results_by_model:
@@ -197,7 +207,7 @@ def plot_comparison_power(results_by_model: dict[str, pd.DataFrame]) -> go.Figur
                 hovertemplate="%{y:.2f} W<extra>" + MODEL_LABELS[model_id] + "</extra>",
             )
         )
-    return _finish(fig, ytitle="Potência do arranjo [W]", height=236)
+    return _finish(fig, ytitle="Potência do arranjo [W]", height=height)
 
 
 def plot_comparison_energy(results_by_model: dict[str, pd.DataFrame]) -> go.Figure:
@@ -239,14 +249,18 @@ def plot_comparison_efficiency(results_by_model: dict[str, pd.DataFrame]) -> go.
     return _finish(fig, ytitle="Eficiência [%]", height=236)
 
 
-def plot_difference_to_sdm(results_by_model: dict[str, pd.DataFrame]) -> go.Figure | None:
-    if MODEL_SDM not in results_by_model:
+def plot_difference_to_reference(
+    results_by_model: dict[str, pd.DataFrame],
+    reference_model: str,
+) -> go.Figure | None:
+    if reference_model not in results_by_model:
         return None
-    ref = results_by_model[MODEL_SDM]["P_array"].astype(float)
+    ref = results_by_model[reference_model]["P_array"].astype(float)
+    reference_label = MODEL_SHORT_LABELS[reference_model]
     fig = go.Figure()
     has_line = False
     for model_id in MODEL_ORDER:
-        if model_id == MODEL_SDM or model_id not in results_by_model:
+        if model_id == reference_model or model_id not in results_by_model:
             continue
         power = results_by_model[model_id]["P_array"].astype(float).reindex(ref.index)
         ref_values = ref.to_numpy()
@@ -263,14 +277,25 @@ def plot_difference_to_sdm(results_by_model: dict[str, pd.DataFrame]) -> go.Figu
                 name=MODEL_LABELS[model_id],
                 mode="lines",
                 line=dict(color=MODEL_COLORS[model_id], width=2.1),
-                hovertemplate="%{y:+.2f} %<extra>Diferença vs SDM</extra>",
+                hovertemplate=(
+                    "%{y:+.2f} %<extra>Diferença vs " + reference_label + "</extra>"
+                ),
             )
         )
         has_line = True
     if not has_line:
         return None
     fig.add_hline(y=0, line_color="#8B98A5", line_dash="dash", line_width=1)
-    return _finish(fig, ytitle="Diferença de potência vs SDM [%]", height=236)
+    return _finish(
+        fig,
+        ytitle=f"Diferença de potência vs {reference_label} [%]",
+        height=236,
+    )
+
+
+def plot_difference_to_sdm(results_by_model: dict[str, pd.DataFrame]) -> go.Figure | None:
+    """Compatibilidade com a comparação originalmente fixa no SDM."""
+    return plot_difference_to_reference(results_by_model, MODEL_SDM)
 
 
 def plot_iv_pv_at_peak(module, results: pd.DataFrame) -> go.Figure:

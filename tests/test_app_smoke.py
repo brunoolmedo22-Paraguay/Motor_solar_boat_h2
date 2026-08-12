@@ -59,7 +59,25 @@ class AppSmokeTest(unittest.TestCase):
             self.assertEqual(app.session_state["selected_result_model"], model_id)
             self.assertEqual(len(app.exception), 0)
 
-        for page in ("Comparação", "Exportação", "Visão geral"):
+        next(button for button in app.button if button.label == "Comparação").click().run()
+        self.assertEqual(app.session_state["current_page"], "Comparação")
+        reference = next(
+            selectbox
+            for selectbox in app.selectbox
+            if selectbox.label == "Modelo de referência"
+        )
+        self.assertEqual(reference.value, "sdm")
+        for model_id in ("irradiancia", "noct_eficiencia", "sdm"):
+            reference = next(
+                selectbox
+                for selectbox in app.selectbox
+                if selectbox.label == "Modelo de referência"
+            )
+            reference.set_value(model_id).run()
+            self.assertEqual(app.session_state["comparison_reference_model"], model_id)
+            self.assertEqual(len(app.exception), 0)
+
+        for page in ("Exportação", "Visão geral"):
             next(button for button in app.button if button.label == page).click().run()
             self.assertEqual(app.session_state["current_page"], page)
             self.assertEqual(len(app.exception), 0)

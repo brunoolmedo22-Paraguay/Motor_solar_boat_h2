@@ -67,7 +67,9 @@ A aplicação possui cinco seções, acessadas por botões próprios no sidebar:
    curvas I-V/P-V e os indicadores elétricos do SDM permanecem disponíveis sob
    demanda no painel de diagnóstico avançado.
 4. **Comparação** — sobreposição de potência, energia e eficiência, diferença
-   relativa ao SDM em uma grade 2 × 2 e tabela comparativa expansível.
+   relativa a um modelo de referência selecionável e tabela comparativa
+   expansível. A página repete o layout operacional com título/configuração à
+   esquerda, KPIs e curva principal à direita.
 5. **Exportação** — seleção do modelo, das colunas, do separador e do formato
    decimal antes de baixar o CSV.
 

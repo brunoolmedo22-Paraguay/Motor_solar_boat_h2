@@ -22,6 +22,7 @@ from simulation.multimodel import (
     simulate_sdm_model,
 )
 from simulation.solver import extract_sdm_params
+from visualization.multimodel_plots import plot_difference_to_reference
 
 
 def constant_profile(g: float = 1000.0, tamb: float | None = 25.0) -> pd.DataFrame:
@@ -155,6 +156,31 @@ class InputContractTests(unittest.TestCase):
                 _, report = extract_sdm_params(module.stc)
                 self.assertTrue(report.success)
                 self.assertLess(report.cost, 1e-6)
+
+
+class ComparisonReferenceTests(unittest.TestCase):
+    def test_relative_power_difference_uses_the_selected_reference(self):
+        index = pd.date_range("2026-03-21 12:00:00", periods=3, freq="1min")
+        results = {
+            MODEL_SIMPLE: pd.DataFrame({"P_array": [100.0, 200.0, 0.0]}, index=index),
+            MODEL_NOCT: pd.DataFrame({"P_array": [110.0, 180.0, 5.0]}, index=index),
+            MODEL_SDM: pd.DataFrame({"P_array": [90.0, 220.0, 7.0]}, index=index),
+        }
+        figure = plot_difference_to_reference(results, MODEL_SIMPLE)
+        self.assertIsNotNone(figure)
+        traces = {trace.name: np.asarray(trace.y, dtype=float) for trace in figure.data}
+        np.testing.assert_allclose(
+            traces["Modelo 2 · NOCT + eficiência"][:2],
+            [10.0, -10.0],
+            atol=1e-12,
+        )
+        np.testing.assert_allclose(
+            traces["Modelo 3 · Single Diode Model"][:2],
+            [-10.0, 10.0],
+            atol=1e-12,
+        )
+        self.assertTrue(np.isnan(traces["Modelo 2 · NOCT + eficiência"][2]))
+        self.assertIn("Irradiância", figure.layout.yaxis.title.text)
 
 
 if __name__ == "__main__":

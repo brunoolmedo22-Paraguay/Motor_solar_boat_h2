@@ -151,3 +151,13 @@ A comparação interna mostra a sensibilidade à complexidade do modelo. Ela nã
 estabelece qual modelo é mais exato. Para validação experimental, uma etapa
 posterior deve comparar cada potência estimada com potência medida e calcular,
 por exemplo, MAE, RMSE e viés.
+
+O usuário pode escolher qualquer modelo disponível como referência. Para cada
+outro modelo `m`, a diferença temporal apresentada é:
+
+```text
+ΔP_m(t) = [P_m(t) - P_ref(t)] / P_ref(t) · 100 %
+```
+
+O cálculo é omitido nos instantes em que a potência da referência é menor ou
+igual a 1 W, evitando divisões numericamente instáveis durante a noite.

@@ -14,7 +14,6 @@ from config.settings import PROFILES
 from models.pv_module import ModuleSTC, SDMParams
 from simulation.multimodel import (
     DEFAULT_EXPORT_COLUMNS,
-    MODEL_COLORS,
     MODEL_LABELS,
     MODEL_NOCT,
     MODEL_ORDER,
@@ -38,7 +37,7 @@ from visualization.multimodel_plots import (
     plot_comparison_energy,
     plot_comparison_power,
     plot_cumulative_energy,
-    plot_difference_to_sdm,
+    plot_difference_to_reference,
     plot_efficiency,
     plot_input_profile,
     plot_iv_pv_at_peak,
@@ -68,7 +67,10 @@ APP_CSS = """
   }
 
   .stApp { background: #FFFFFF; color: var(--solar-text); }
-  .block-container { padding-top: 4.75rem; padding-bottom: 3.5rem; max-width: 1680px; }
+  .block-container {
+    padding-top: 4.75rem; padding-bottom: 3.5rem;
+    padding-left:1.25rem; padding-right:1.6rem; max-width: 1780px;
+  }
   h1, h2, h3 { letter-spacing: -0.025em; color: var(--solar-text); }
 
   [data-testid="stSidebar"] {
@@ -285,6 +287,7 @@ def init_state() -> None:
         "current_page": NAV_OVERVIEW,
         "last_run_notice": None,
         "selected_result_model": MODEL_SDM,
+        "comparison_reference_model": MODEL_SDM,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -1096,17 +1099,15 @@ def render_models_page() -> None:
     kpi = kpis_by_model[selected_model]
     with main_chart:
         with st.container(border=True, height="stretch"):
+            panel_title("Síntese · Indicadores do modelo selecionado")
+            _metric_row(selected_model, result, kpi)
             panel_title(f"Curva principal · Potência gerada · {MODEL_SHORT_LABELS[selected_model]}")
             st.plotly_chart(
-                plot_model_power(result, selected_model, height=330),
+                plot_model_power(result, selected_model, height=250),
                 width="stretch",
                 config=CHART_CONFIG,
                 key=f"power_main_{selected_model}",
             )
-
-    with st.container(border=True):
-        panel_title("Síntese · Indicadores do modelo selecionado")
-        _metric_row(selected_model, result, kpi)
 
     energy_col, thermal_col, efficiency_col = st.columns(3, gap="small")
     with energy_col:
@@ -1202,41 +1203,17 @@ def _comparison_table(results_by_model: dict, kpis_by_model: dict) -> pd.DataFra
 
 
 def render_comparison_page() -> None:
-    page_header(
-        "Comparação · Consistência multimodelo",
-        "DIFERENÇAS ENTRE AS ESTIMATIVAS",
-        "Sobreposição de potência, energia e eficiência para a mesma janela de entrada.",
-    )
     if _empty_results("Execute uma janela na seção Entrada antes de comparar os modelos."):
         return
 
     results = st.session_state["results_by_model"]
-    statuses = st.session_state["model_statuses"]
     kpis = st.session_state["kpis_by_model"]
     profile = st.session_state["profile"]
-
-    status_cols = st.columns(3)
-    for col, model_id in zip(status_cols, MODEL_ORDER):
-        status = statuses.get(model_id)
-        available = model_id in results
-        color = MODEL_COLORS[model_id] if available else "#A0AEC0"
-        message = status.message if status is not None else "Não executado."
-        with col:
-            st.markdown(
-                f"""
-                <div class="model-status-card">
-                  <b><span class="dot" style="background:{color}"></span>{MODEL_LABELS[model_id]}</b>
-                  <p>{message}</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    if len(results) < 2:
-        st.warning(
-            "Somente um modelo está disponível. A comparação precisa de temperatura ambiente completa para executar os modelos 2 e 3."
-        )
-        return
+    module = st.session_state["module"]
+    available_models = [model_id for model_id in MODEL_ORDER if model_id in results]
+    preferred_reference = MODEL_SDM if MODEL_SDM in available_models else available_models[0]
+    if st.session_state.get("comparison_reference_model") not in available_models:
+        st.session_state["comparison_reference_model"] = preferred_reference
 
     energies = [kpis[mid]["energy_kWh"] for mid in results]
     peaks = [kpis[mid]["p_max_W"] for mid in results]
@@ -1244,23 +1221,91 @@ def render_comparison_page() -> None:
     energy_spread_pct = energy_spread / np.mean(energies) * 100.0 if np.mean(energies) else 0.0
     peak_spread = max(peaks) - min(peaks)
 
-    q1, q2, q3, q4 = st.columns(4)
-    q1.metric("Modelos comparados", f"{len(results)}")
-    q2.metric("Dispersão de energia", f"{energy_spread:.4f} kWh", f"{energy_spread_pct:.2f} % da média")
-    q3.metric("Dispersão de pico", f"{peak_spread:.1f} W")
-    q4.metric("Janela", _window_label(profile), "1 minuto por passo")
+    controls, main_chart = st.columns([0.62, 1.78], gap="small")
+    with controls:
+        with st.container(border=True):
+            panel_title("Comparação · Consistência multimodelo")
+            st.markdown(
+                """
+                <div class="model-page-title">COMPARAÇÃO DOS MODELOS</div>
+                <div class="model-page-subtitle">
+                  Sobreposição, dispersão e diferença relativa para a mesma janela.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-    c1, c2 = st.columns([1.24, .76], gap="small")
-    with c1:
         with st.container(border=True, height="stretch"):
-            panel_title("Potência · Sobreposição dos modelos")
+            panel_title("Configurações · Modelo de referência")
+            reference_model = st.selectbox(
+                "Modelo de referência",
+                options=available_models,
+                format_func=lambda model_id: MODEL_LABELS[model_id],
+                key="comparison_reference_model",
+                help="As diferenças percentuais dos demais modelos serão calculadas em relação a esta curva.",
+            )
+            st.markdown(
+                f"""
+                <div class="config-facts">
+                  <div class="config-fact"><small>Módulo</small><b>{module.stc.model}</b></div>
+                  <div class="config-fact"><small>Janela</small><b>{_window_label(profile)} · passo 1 min</b></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            chips = []
+            for model_id in MODEL_ORDER:
+                available = model_id in results
+                chips.append(
+                    status_chip(
+                        ("● " if available else "○ ") + MODEL_SHORT_LABELS[model_id],
+                        "ok" if available else "warn",
+                    )
+                )
+            st.markdown(
+                '<div class="status-row">' + "".join(chips) + "</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"""
+                <div class="formula-box">
+                  <b>Referência: {MODEL_SHORT_LABELS[reference_model]}.</b><br>
+                  ΔP = (P<sub>modelo</sub> − P<sub>referência</sub>) /
+                  P<sub>referência</sub> × 100.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with main_chart:
+        with st.container(border=True, height="stretch"):
+            panel_title("Síntese · Indicadores da comparação")
+            q1, q2, q3, q4 = st.columns(4)
+            q1.metric("Modelos comparados", f"{len(results)}")
+            q2.metric(
+                "Dispersão de energia",
+                f"{energy_spread:.4f} kWh",
+                f"{energy_spread_pct:.2f} % da média",
+                delta_color="off",
+            )
+            q3.metric("Dispersão de pico", f"{peak_spread:.1f} W")
+            q4.metric("Janela", _window_label(profile), "1 minuto por passo", delta_color="off")
+            panel_title("Curva principal · Potência · Sobreposição dos modelos")
             st.plotly_chart(
-                plot_comparison_power(results),
+                plot_comparison_power(results, height=250),
                 width="stretch",
                 config=CHART_CONFIG,
                 key="comparison_power",
             )
-    with c2:
+
+    if len(results) < 2:
+        st.warning(
+            "Somente um modelo está disponível. A comparação cruzada requer pelo menos dois resultados."
+        )
+
+    difference_fig = plot_difference_to_reference(results, reference_model)
+    energy_col, efficiency_col, difference_col = st.columns(3, gap="small")
+    with energy_col:
         with st.container(border=True, height="stretch"):
             panel_title("Energia · Acumulada")
             st.plotly_chart(
@@ -1269,9 +1314,7 @@ def render_comparison_page() -> None:
                 config=CHART_CONFIG,
                 key="comparison_energy",
             )
-    difference_fig = plot_difference_to_sdm(results)
-    d1, d2 = st.columns(2, gap="small")
-    with d1:
+    with efficiency_col:
         with st.container(border=True, height="stretch"):
             panel_title("Eficiência · Sobreposição")
             st.plotly_chart(
@@ -1280,22 +1323,23 @@ def render_comparison_page() -> None:
                 config=CHART_CONFIG,
                 key="comparison_efficiency",
             )
-
-    with d2:
+    with difference_col:
         with st.container(border=True, height="stretch"):
             if difference_fig is not None:
-                panel_title("Potência · Diferença relativa ao SDM")
+                panel_title(
+                    f"Potência · Diferença relativa a {MODEL_SHORT_LABELS[reference_model]}"
+                )
                 st.plotly_chart(
                     difference_fig,
                     width="stretch",
                     config=CHART_CONFIG,
-                    key="comparison_difference",
+                    key=f"comparison_difference_{reference_model}",
                 )
             else:
-                panel_title("Diferença relativa ao SDM")
+                panel_title("Diferença relativa à referência")
                 st.markdown(
-                    '<div class="compact-note"><b>SDM indisponível</b>'
-                    "Execute o modelo físico para calcular a diferença relativa de potência.</div>",
+                    '<div class="compact-note"><b>Sem outra curva disponível</b>'
+                    "Execute ao menos dois modelos para calcular a diferença relativa.</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -1316,7 +1360,8 @@ def render_comparison_page() -> None:
             },
         )
         st.caption(
-            "A divergência entre modelos mede consistência interna; a exatidão deve ser validada posteriormente contra potência medida."
+            "A divergência é calculada em relação ao modelo de referência selecionado; "
+            "a exatidão deve ser validada posteriormente contra potência medida."
         )
 
 
