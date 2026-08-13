@@ -110,7 +110,6 @@ APP_CSS = """
   }
   .eyebrow { color: var(--solar-blue); font-size:.68rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
   .page-title { font-size:1.55rem; line-height:1.08; font-weight:900; color:#111A22; margin:.2rem 0 .12rem; }
-  .page-subtitle { color:var(--solar-muted); font-size:.82rem; }
   .panel-title { color:var(--solar-blue); font-size:.66rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.38rem; }
   .formula-box {
     background:#F7FAFC; border:1px solid #E1E7ED; border-left:3px solid var(--solar-blue);
@@ -136,7 +135,6 @@ APP_CSS = """
   }
   .compact-note b { color:#203746; font-size:.85rem; margin-bottom:.25rem; }
   .model-page-title { color:#111A22; font-size:1.42rem; line-height:1.08; font-weight:900; margin:.2rem 0 .3rem; }
-  .model-page-subtitle { color:#718096; font-size:.75rem; line-height:1.45; margin-bottom:.22rem; }
   .config-facts { display:grid; grid-template-columns:1fr 1fr; gap:.42rem; margin:.18rem 0 .12rem; }
   .config-fact { border:1px solid #E0E6EB; border-radius:7px; background:#FBFCFD; padding:.46rem .52rem; }
   .config-fact small { display:block; color:#788896; font-size:.57rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
@@ -150,9 +148,6 @@ APP_CSS = """
     color:#111A22; font-size:1.48rem; line-height:1.04; font-weight:920;
     letter-spacing:-.035em;
   }
-  .input-title-subtitle {
-    color:#6B7C8B; font-size:.72rem; line-height:1.45; margin-top:.5rem;
-  }
   .st-key-input_run_panel .stButton > button {
     min-height:12rem; border-radius:18px; font-size:1rem; letter-spacing:.015em;
   }
@@ -160,8 +155,10 @@ APP_CSS = """
   .st-key-input_system_panel .datasheet-grid {
     grid-template-columns:repeat(6,minmax(0,1fr)); gap:.42rem;
   }
+  .st-key-input_system_panel .arrangement-grid {
+    grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:.42rem;
+  }
   .st-key-input_system_panel .datasheet-item { padding:.52rem .56rem; }
-  .st-key-input_system_panel .status-row { margin:.34rem 0 .4rem; }
   .input-common-note {
     border-left:3px solid #1380AC; border-radius:0 8px 8px 0;
     background:#F2F8FC; color:#426174; font-size:.73rem; line-height:1.48;
@@ -178,7 +175,6 @@ APP_CSS = """
     color:#101A22; font-size:2rem; line-height:1.04; font-weight:920;
     letter-spacing:-.035em; margin:.34rem 0 .28rem;
   }
-  .overview-hero-subtitle { color:#617383; font-size:.88rem; line-height:1.5; }
   .overview-hero-note {
     border-left:3px solid #1380AC; background:#F1F8FC; border-radius:0 8px 8px 0;
     padding:.68rem .8rem; color:#31536A; font-size:.78rem; line-height:1.52;
@@ -275,6 +271,14 @@ APP_CSS = """
   div[data-testid="stMetricLabel"] { color:#657484; font-size:.69rem; }
   div[data-testid="stMetricValue"] { color:#111820; font-size:1.12rem; font-weight:850; }
   div[data-testid="stMetricDelta"] { font-size:.62rem; }
+  .kpi-card {
+    min-height:76px; background:#FFFFFF; border:1px solid #DDE3E9;
+    border-radius:9px; padding:.48rem .62rem;
+  }
+  .kpi-label { color:#657484; font-size:.69rem; line-height:1.3; margin-bottom:.22rem; }
+  .kpi-value-line { display:flex; align-items:baseline; gap:.46rem; flex-wrap:wrap; }
+  .kpi-value { color:#111820; font-size:1.12rem; line-height:1.2; font-weight:850; }
+  .kpi-context { color:#718096; font-size:.64rem; line-height:1.2; font-weight:750; white-space:nowrap; }
   div[data-testid="stAlert"] { padding:.52rem .7rem; }
   div[data-testid="stPlotlyChart"] { margin:0 !important; }
 
@@ -309,6 +313,7 @@ APP_CSS = """
   @media (max-width: 900px) {
     .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .st-key-input_system_panel .datasheet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .st-key-input_system_panel .arrangement-grid { grid-template-columns:1fr; }
     .st-key-input_run_panel .stButton > button { min-height:4.25rem; border-radius:10px; }
     .process-band { grid-template-columns:1fr; }
     .process-arrow { transform:rotate(90deg); justify-self:center; }
@@ -372,13 +377,12 @@ def cached_sdm_extraction(stc_dict: dict) -> tuple[dict, dict]:
     return params.to_dict(), asdict(report)
 
 
-def page_header(eyebrow: str, title: str, subtitle: str) -> None:
+def page_header(eyebrow: str, title: str) -> None:
     st.markdown(
         f"""
         <div class="page-head">
           <div class="eyebrow">{eyebrow}</div>
           <div class="page-title">{title}</div>
-          <div class="page-subtitle">{subtitle}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -507,10 +511,7 @@ def render_overview_page() -> None:
             st.markdown(
                 """
                 <div class="eyebrow">Visão geral · Fundamentos e arquitetura</div>
-                <div class="overview-hero-title">DO SOL À POTÊNCIA ELÉTRICA</div>
-                <div class="overview-hero-subtitle">
-                  Um motor fotovoltaico multimodelo para estimativa, comparação e continuidade operacional.
-                </div>
+                <div class="overview-hero-title">MODELO SOLAR FOTOVOLTAICO</div>
                 <div class="overview-hero-copy">
                   Um <b>modelo solar fotovoltaico</b> transforma condições ambientais e dados do painel
                   em potência elétrica estimada. Ele conecta a <b>irradiância</b> e a
@@ -733,7 +734,6 @@ def render_input_page() -> None:
                 """
                 <div class="input-title-eyebrow">Entrada · Configuração comum</div>
                 <div class="input-title-main">ENTRADA<br>DOS MODELOS</div>
-                <div class="input-title-subtitle">Prepare a janela e execute o motor multimodelo.</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -777,11 +777,13 @@ def render_input_page() -> None:
             model_datasheet(module_preview)
             installed_kwp = module_preview.stc.p_nom * int(n_series) * int(n_parallel) / 1000.0
             st.markdown(
-                '<div class="status-row">'
-                + status_chip(f"{int(n_series)}S × {int(n_parallel)}P", "info")
-                + status_chip(f"{int(n_series)*int(n_parallel)} módulos", "info")
-                + status_chip(f"{installed_kwp:.3f} kWp", "ok")
-                + "</div>",
+                f"""
+                <div class="datasheet-grid arrangement-grid">
+                  <div class="datasheet-item"><small>Arranjo</small><b>{int(n_series)}S × {int(n_parallel)}P</b></div>
+                  <div class="datasheet-item"><small>Módulos instalados</small><b>{int(n_series)*int(n_parallel)} módulos</b></div>
+                  <div class="datasheet-item"><small>Potência instalada</small><b>{installed_kwp:.3f} kWp</b></div>
+                </div>
+                """,
                 unsafe_allow_html=True,
             )
             st.markdown(
@@ -1072,19 +1074,40 @@ def _empty_results(message: str) -> bool:
     return False
 
 
+def _kpi_card(label: str, value: str, context: str | None = None) -> None:
+    context_html = (
+        f'<span class="kpi-context">// {context}</span>' if context else ""
+    )
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+          <div class="kpi-label">{label}</div>
+          <div class="kpi-value-line">
+            <span class="kpi-value">{value}</span>{context_html}
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _metric_row(model_id: str, result: pd.DataFrame, kpi: dict) -> None:
     m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Energia na janela", f"{kpi['energy_kWh']:.4f} kWh")
-    m2.metric(
-        "Potência máxima",
-        f"{kpi['p_max_W']:.1f} W",
-        f"pico às {kpi['t_peak']:%H:%M}",
-        delta_color="off",
-    )
-    m3.metric("Potência média", f"{kpi['p_mean_W']:.1f} W")
-    m4.metric("Eficiência energética", f"{kpi['eta_energy']*100:.2f} %")
+    with m1:
+        _kpi_card("Energia na janela", f"{kpi['energy_kWh']:.4f} kWh")
+    with m2:
+        _kpi_card(
+            "Potência máxima",
+            f"{kpi['p_max_W']:.1f} W",
+            f"{kpi['t_peak']:%H:%M} h",
+        )
+    with m3:
+        _kpi_card("Potência média", f"{kpi['p_mean_W']:.1f} W")
+    with m4:
+        _kpi_card("Eficiência energética", f"{kpi['eta_energy']*100:.2f} %")
     tc_label = "Não utilizada" if np.isnan(kpi["tc_max_C"]) else f"{kpi['tc_max_C']:.2f} °C"
-    m5.metric("Temperatura de célula máxima", tc_label)
+    with m5:
+        _kpi_card("Temperatura de célula máxima", tc_label)
 
 
 def _formula_for(model_id: str) -> None:
@@ -1133,9 +1156,6 @@ def render_models_page() -> None:
             st.markdown(
                 """
                 <div class="model-page-title">MODELOS FOTOVOLTAICOS</div>
-                <div class="model-page-subtitle">
-                  Potência, energia e comportamento físico da mesma janela meteorológica.
-                </div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -1306,9 +1326,6 @@ def render_comparison_page() -> None:
             st.markdown(
                 """
                 <div class="model-page-title">COMPARAÇÃO DOS MODELOS</div>
-                <div class="model-page-subtitle">
-                  Sobreposição, dispersão e diferença relativa para a mesma janela.
-                </div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -1359,15 +1376,18 @@ def render_comparison_page() -> None:
         with st.container(border=True, height="stretch"):
             panel_title("Síntese · Indicadores da comparação")
             q1, q2, q3, q4 = st.columns(4)
-            q1.metric("Modelos comparados", f"{len(results)}")
-            q2.metric(
-                "Dispersão de energia",
-                f"{energy_spread:.4f} kWh",
-                f"{energy_spread_pct:.2f} % da média",
-                delta_color="off",
-            )
-            q3.metric("Dispersão de pico", f"{peak_spread:.1f} W")
-            q4.metric("Janela", _window_label(profile), "1 minuto por passo", delta_color="off")
+            with q1:
+                _kpi_card("Modelos comparados", f"{len(results)}")
+            with q2:
+                _kpi_card(
+                    "Dispersão de energia",
+                    f"{energy_spread:.4f} kWh",
+                    f"{energy_spread_pct:.2f} % da média",
+                )
+            with q3:
+                _kpi_card("Dispersão de pico", f"{peak_spread:.1f} W")
+            with q4:
+                _kpi_card("Janela", _window_label(profile), "passo de 1 min")
             panel_title("Curva principal · Potência · Sobreposição dos modelos")
             st.plotly_chart(
                 plot_comparison_power(results, height=250),
@@ -1447,7 +1467,6 @@ def render_export_page() -> None:
     page_header(
         "Exportação · Saída configurável",
         "CSV PARA O OTIMIZADOR E O GÊMEO DIGITAL",
-        "Escolha o modelo e monte o arquivo somente com as colunas necessárias.",
     )
     if _empty_results("Execute pelo menos um modelo antes de preparar a exportação."):
         return
